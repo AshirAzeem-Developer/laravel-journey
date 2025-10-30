@@ -245,24 +245,42 @@
 
 
         button.addEventListener('click', async () => {
+            button.disabled = true;
+            const spinner = document.getElementById('spinner');
+            spinner?.classList.remove('hidden');
+
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const fileInput = document.getElementById('userFile');
             const action = button.getAttribute('data-action');
+
+            if (!name || !email) {
+                showToast('Please fill all required fields.', 'warning');
+                button.disabled = false;
+                spinner?.classList.add('hidden');
+                return;
+            }
+
             const formData = new FormData();
-            formData.append('name', nameInput.value.trim());
-            formData.append('email', emailInput.value.trim());
-            if (passwordInput.value.trim()) formData.append('password', passwordInput.value.trim());
-            if (fileInput.files[0]) formData.append('file', fileInput.files[0]);
+            formData.append('name', name);
+            formData.append('email', email);
+            if (password) formData.append('password', password);
+            if (fileInput && fileInput.files[0]) formData.append('file', fileInput.files[0]);
 
             let url = '',
                 method = 'POST';
-            if (action === 'edit' && currentUserId) {
+            if (action === 'add') {
+                url = "{{ route('users.store') }}";
+            } else if (action === 'edit' && currentUserId) {
                 url = `{{ url('dashboard/users') }}/${currentUserId}`;
                 formData.append('_method', 'PATCH');
             } else {
-                url = "{{ route('users.store') }}";
+                showToast('Invalid operation.', 'error');
+                button.disabled = false;
+                spinner?.classList.add('hidden');
+                return;
             }
-
-            button.disabled = true;
-            spinner.classList.remove('hidden');
 
             try {
                 const res = await fetch(url, {
@@ -272,16 +290,37 @@
                     },
                     body: formData
                 });
-                const data = await res.json();
-                if (!data.success) throw new Error();
-                showToast(`User ${action === 'add' ? 'added' : 'updated'} successfully!`);
+
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch {
+                    console.warn('Response not JSON');
+                }
+
+                if (!res.ok || !data.success) {
+                    if (data.errors) {
+                        Object.values(data.errors).forEach(errorArr => {
+                            errorArr.forEach(errMsg => showToast(errMsg, 'error'));
+                        });
+                    } else {
+                        showToast(data.message || 'Something went wrong.', 'error');
+                    }
+                    return;
+                }
+
+                showToast(data.message || 'User saved successfully!', 'success');
                 closeAddUserModal();
+
+                // Optional: reload after short delay
                 setTimeout(() => location.reload(), 1000);
-            } catch {
-                showToast('Failed to save user.', 'error');
+
+            } catch (err) {
+                console.error('Submit Error:', err);
+                showToast('A network or server error occurred.', 'error');
             } finally {
-                spinner.classList.add('hidden');
                 button.disabled = false;
+                spinner?.classList.add('hidden');
             }
         });
     </script>
