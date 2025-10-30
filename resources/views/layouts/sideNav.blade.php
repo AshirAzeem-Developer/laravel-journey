@@ -3,21 +3,21 @@
 
     @php
         // Ensure we have a reliable active section even if the controller didn't provide it
-        if (!isset($activeSection)) {
-            if (request()->routeIs('dashboard')) {
-                $activeSection = 'summary_stats';
-            } else {
-                // For the route named 'dashboard.section' the route parameter is 'section'
-                $activeSection = request()->route('section') ?? null;
-            }
-        }
+if (!isset($activeSection)) {
+    if (request()->routeIs('dashboard')) {
+        $activeSection = 'summary_stats';
+    } else {
+        // For the route named 'dashboard.section' the route parameter is 'section'
+        $activeSection = request()->route('section') ?? null;
+    }
+}
 
-        // Normalize counters used in the sidebar so we can show badges reliably
-        $totalUsersCount = $contentData['totalUsers'] ?? $summaryData['totalUsers'] ?? null;
+// Normalize counters used in the sidebar so we can show badges reliably
+$totalUsersCount = $contentData['totalUsers'] ?? ($summaryData['totalUsers'] ?? null);
 
-        if (!isset($failedJobsCount)) {
-            if (isset($contentData['failedJobs'])) {
-                $failedJobsCount = is_countable($contentData['failedJobs']) ? count($contentData['failedJobs']) : null;
+if (!isset($failedJobsCount)) {
+    if (isset($contentData['failedJobs'])) {
+        $failedJobsCount = is_countable($contentData['failedJobs']) ? count($contentData['failedJobs']) : null;
             } elseif (isset($failedJobs)) {
                 $failedJobsCount = is_countable($failedJobs) ? count($failedJobs) : null;
             } else {
@@ -28,10 +28,10 @@
 
     {{-- Sidenav Header (Logo and Brand Name) --}}
     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
-        <a class="flex items-center space-x-2 py-3 px-2" href="{{ route('dashboard') }}">
-            <img src="{{ asset('assets/images/logo-ct-dark.png') }}" class="w-8 h-8 rounded-lg" alt="main_logo">
-            <span
-                class="ml-1 text-sm text-gray-900 dark:text-white font-bold">{{ config('app.name', 'Dashboard') }}</span>
+        <a class="flex items-center justify-center  py-3 " href="{{ route('dashboard') }}">
+            <img src="{{ asset('assets/images/logo1.png') }}" class="w-full h-auto rounded-lg" alt="main_logo">
+            {{-- <span
+                class="ml-1 text-sm text-gray-900 dark:text-white font-bold">{{ config('app.name', 'Dashboard') }}</span> --}}
         </a>
 
         {{-- Mobile Close Button --}}
