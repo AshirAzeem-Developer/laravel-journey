@@ -63,7 +63,8 @@
                                     <form method="POST" action="{{ route('users.destroy', $user->id) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Are you sure?')"
+                                        <button type="button"
+                                            onclick="openDeleteConfirmModal('{{ route('users.destroy', $user->id) }}')"
                                             class="text-rose-500 hover:text-rose-700 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -92,7 +93,6 @@
         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 ease-in-out">
         <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl p-6 relative">
 
-            <!-- Close Button -->
             <button type="button" onclick="closeAddUserModal()"
                 class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
@@ -101,8 +101,7 @@
                 </svg>
             </button>
 
-            <!-- Header -->
-            <div class="px-6 py-6  text-center border-b border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-6  text-center border-b border-gray-200 dark:border-gray-700">
                 <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Add New
                     User</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage user details easily</p>
@@ -172,6 +171,45 @@
 
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
 
+    <div id="deleteConfirmModal"
+        class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 backdrop-blur-sm transition-all">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2 text-center">
+                Confirm Deletion
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-center mb-6">
+                Are you sure you want to delete this user? This action cannot be undone.
+            </p>
+
+            <div class="flex justify-center gap-4">
+                <button id="cancelDeleteBtn"
+                    class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    Cancel
+                </button>
+                <button id="confirmDeleteBtn"
+                    class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium shadow-md transition-all duration-300 flex items-center gap-2"></button>
+                {{-- Added flex items-center gap-2 for spinner/text alignment --}}
+                <span id="deleteButtonText">Delete</span> {{-- Added span for text --}}
+                {{-- Spinner for Delete Button --}}
+                <svg id="deleteSpinner" class="hidden w-5 h-5 animate-spin text-white"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                        stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                </button>
+            </div>
+
+            <button type="button" id="closeDeleteModal"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <script>
         const modal = document.getElementById('addUserModal');
         const nameInput = document.getElementById('userName');
@@ -184,6 +222,16 @@
         const buttonText = document.getElementById('buttonText');
         const modalTitle = document.getElementById('modalTitle');
         let currentUserId = null;
+
+        // --- New/Updated Delete Modal Variables ---
+        const deleteModal = document.getElementById('deleteConfirmModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const deleteButtonText = document.getElementById('deleteButtonText');
+        const deleteSpinner = document.getElementById('deleteSpinner');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const closeDeleteModal = document.getElementById('closeDeleteModal');
+        let deleteUrl = null;
+        // ------------------------------------------
 
         fileInput.addEventListener('change', () => {
             const file = fileInput.files[0];
@@ -245,8 +293,9 @@
 
 
         button.addEventListener('click', async () => {
+            // Show spinner and disable button
             button.disabled = true;
-            const spinner = document.getElementById('spinner');
+            buttonText.textContent = ''; // Hide text
             spinner?.classList.remove('hidden');
 
             const name = nameInput.value.trim();
@@ -257,6 +306,8 @@
 
             if (!name || !email) {
                 showToast('Please fill all required fields.', 'warning');
+                // Hide spinner and enable button
+                buttonText.textContent = 'Save User';
                 button.disabled = false;
                 spinner?.classList.add('hidden');
                 return;
@@ -274,9 +325,11 @@
                 url = "{{ route('users.store') }}";
             } else if (action === 'edit' && currentUserId) {
                 url = `{{ url('dashboard/users') }}/${currentUserId}`;
-                formData.append('_method', 'PATCH');
+                formData.append('_method',
+                    'POST'); // Use POST for form-data, Laravel will handle PATCH via _method
             } else {
                 showToast('Invalid operation.', 'error');
+                buttonText.textContent = 'Save User';
                 button.disabled = false;
                 spinner?.classList.add('hidden');
                 return;
@@ -319,11 +372,81 @@
                 console.error('Submit Error:', err);
                 showToast('A network or server error occurred.', 'error');
             } finally {
+                // Hide spinner and enable button
+                buttonText.textContent = action === 'add' ? 'Save User' : 'Update User'; // Reset button text
                 button.disabled = false;
                 spinner?.classList.add('hidden');
             }
         });
+
+
+        // Open modal
+        function openDeleteConfirmModal(url) {
+            deleteUrl = url;
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+        }
+
+        // Close modal
+        function closeDeleteConfirmModal() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+            // Ensure button state is reset on close
+            deleteButtonText.textContent = 'Delete';
+            confirmDeleteBtn.disabled = false;
+            deleteSpinner?.classList.add('hidden');
+        }
+
+        // Cancel or close actions
+        cancelDeleteBtn.addEventListener('click', closeDeleteConfirmModal);
+        closeDeleteModal.addEventListener('click', closeDeleteConfirmModal);
+
+        // Confirm delete action
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!deleteUrl) return;
+
+            // Show spinner and disable button
+            confirmDeleteBtn.disabled = true;
+            deleteButtonText.textContent = ''; // Hide text
+            deleteSpinner?.classList.remove('hidden');
+
+            try {
+                const res = await fetch(deleteUrl, {
+                    method: 'POST', // Always use POST when simulating DELETE with _method
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        // Laravel will read the X-HTTP-Method-Override header for non-POST/GET requests from JS
+                        // or rely on _method in the body if using a form submission and not pure fetch
+                        'X-HTTP-Method-Override': 'DELETE'
+                    }
+                });
+
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch {
+                    console.warn('Response not JSON');
+                }
+
+                if (res.ok && data.success) {
+                    showToast(data.message || 'User deleted successfully!', 'success');
+                    closeDeleteConfirmModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'Failed to delete user.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('A network error occurred.', 'error');
+            } finally {
+                // Hide spinner and enable button
+                deleteButtonText.textContent = 'Delete';
+                confirmDeleteBtn.disabled = false;
+                deleteSpinner?.classList.add('hidden');
+            }
+        });
     </script>
+
 
     <style>
         @keyframes modalFadeIn {
