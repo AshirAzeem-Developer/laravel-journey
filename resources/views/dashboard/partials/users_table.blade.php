@@ -42,7 +42,7 @@
                             class="hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all duration-200 cursor-pointer">
                             <td class="px-6 py-4 text-gray-800 dark:text-gray-200 font-medium">{{ $user->id }}</td>
                             <td class="px-6 py-4">
-                                <img src="{{ $user->file_path ? asset('storage/' . $user->file_path) : asset('images/default-avatar.png') }}"
+                                <img src="{{ $user->file_path ? asset('storage/' . $user->file_path) : asset('asset/images/default-avatar.png') }}"
                                     class="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-700"
                                     alt="Profile">
                             </td>

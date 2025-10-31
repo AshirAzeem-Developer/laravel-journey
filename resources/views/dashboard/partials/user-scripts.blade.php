@@ -45,7 +45,7 @@
         emailInput.value = '';
         passwordInput.value = '';
         fileInput.value = '';
-        previewImage.src = '{{ asset('images/default-avatar.png') }}';
+        previewImage.src = '{{ asset('asset/images/default-avatar.png') }}';
         button.setAttribute('data-action', 'add');
         modalTitle.textContent = 'Add New User';
         modal.classList.remove('hidden');
@@ -67,7 +67,7 @@
             nameInput.value = data.user.name;
             emailInput.value = data.user.email;
 
-            const defaultAvatar = "{{ asset('images/default-avatar.png') }}";
+            const defaultAvatar = "{{ asset('asset/images/default-avatar.png') }}";
             previewImage.src = data.user.file_path ?
                 `/storage/${data.user.file_path}` :
                 defaultAvatar;

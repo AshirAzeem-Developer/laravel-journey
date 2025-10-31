@@ -112,7 +112,7 @@ $notificationsIcon =
                         <a class="block hover:bg-gray-50 rounded-lg transition-colors p-2" href="javascript:;">
                             <div class="flex py-1 space-x-3 items-center">
                                 <div class="flex-shrink-0">
-                                    <img src="{{ asset('assets/images/team-2.jpg') }}"
+                                    <img src="{{ asset('assets/asset/images/team-2.jpg') }}"
                                         onerror="this.src='https://placehold.co/32x32/1d4ed8/ffffff?text=U'"
                                         class="h-8 w-8 rounded-full object-cover shadow-sm">
                                 </div>

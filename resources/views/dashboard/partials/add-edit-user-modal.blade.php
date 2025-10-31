@@ -23,7 +23,7 @@
 
             <div class="flex flex-col items-center space-y-3">
                 <div class="relative">
-                    <img id="previewImage" src="{{ asset('images/default-avatar.png') }}"
+                    <img id="previewImage" src="{{ asset('asset/images/default-avatar.png') }}"
                         class="w-28 h-28 rounded-full object-cover border-4 border-indigo-100 dark:border-gray-700 shadow-md transition-all duration-300 hover:scale-105"
                         alt="Profile Preview">
 

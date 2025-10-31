@@ -29,7 +29,7 @@ if (!isset($failedJobsCount)) {
     {{-- Sidenav Header (Logo and Brand Name) --}}
     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
         <a class="flex items-center justify-center  py-3 " href="{{ route('dashboard') }}">
-            <img src="{{ asset('assets/images/logo1.png') }}" class="w-full h-auto rounded-lg" alt="main_logo">
+            <img src="{{ asset('asset/images/logo1.png') }}" class="w-full h-auto rounded-lg" alt="main_logo">
             {{-- <span
                 class="ml-1 text-sm text-gray-900 dark:text-white font-bold">{{ config('app.name', 'Dashboard') }}</span> --}}
         </a>
@@ -134,7 +134,8 @@ if (!isset($failedJobsCount)) {
             {{-- Products --}}
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    href="#">
+                    href="{{ route('products.index') }}">
+
                     <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
                         inventory_2
                     </span>
