@@ -149,6 +149,7 @@
             const data = await res.json();
             if (!data.success) throw new Error('Fetch failed');
 
+            console.log("Product Selected Data -> ", data);
             currentProductId = data.product.id;
             productNameInput.value = data.product.product_name;
             productDescriptionInput.value = data.product.description || '';
