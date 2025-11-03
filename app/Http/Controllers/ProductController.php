@@ -113,18 +113,33 @@ class ProductController extends Controller
             DB::beginTransaction();
 
             $productData = $request->except(['attachments']);
-            $existingAttachments = json_decode($product->attachments ?? '[]', true);
-            $newAttachments = $existingAttachments;
+            $productData['updated_by'] = Auth::id();
 
+            $existingAttachments = json_decode($product->attachments ?? '[]', true);
+            $newAttachments = [];
+
+            // ✅ If user uploads new images
             if ($request->hasFile('attachments')) {
+                // Delete old attachments first
+                foreach ($existingAttachments as $filePath) {
+                    if (Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
+                    }
+                }
+
+                // Upload and save new attachments
                 foreach ($request->file('attachments') as $file) {
                     $path = $file->store('uploads/products', 'public');
                     $newAttachments[] = $path;
                 }
+
+                $productData['attachments'] = json_encode($newAttachments);
             }
 
-            $productData['attachments'] = json_encode($newAttachments);
-            $productData['updated_by'] = Auth::id();
+            // ✅ If no new images uploaded, keep old ones
+            else {
+                $productData['attachments'] = json_encode($existingAttachments);
+            }
 
             $product->update($productData);
 
@@ -143,6 +158,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Remove the specified product from storage.

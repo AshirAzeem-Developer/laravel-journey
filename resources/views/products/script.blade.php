@@ -246,7 +246,7 @@
 
             showToast(data.message || 'Product saved successfully!', 'success');
             closeProductModal();
-            // setTimeout(() => location.reload(), 1000);
+            setTimeout(() => location.reload(), 1000);
         } catch (err) {
             console.error(err);
             showToast('Network or server error.', 'error');
