@@ -7,6 +7,7 @@
     const productModal = document.getElementById('productModal');
     const productTitle = document.getElementById('productModalTitle');
     const productNameInput = document.getElementById('productName');
+    const productDescriptionInput = document.getElementById('productDescription');
     const productPriceInput = document.getElementById('productPrice');
     const productCategorySelect = document.getElementById('productCategory');
     const isHotCheckbox = document.getElementById('productHot');
@@ -28,9 +29,35 @@
     let deleteProductUrl = null;
 
     // --- Image Preview ---
-    productFileInput?.addEventListener('change', () => {
-        const file = productFileInput.files[0];
-        if (file) productPreview.src = URL.createObjectURL(file);
+    productFileInput?.addEventListener('change', (event) => {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('productPreviewContainer'); // New container ID
+
+        // Clear existing previews
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+        }
+
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className =
+                            'w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2';
+
+                        // Append the new image element to the container
+                        if (previewContainer) {
+                            previewContainer.appendChild(img);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
     });
 
     // --- Toast Notification ---
@@ -51,6 +78,7 @@
     function openAddProductModal() {
         productTitle.textContent = 'Add New Product';
         productNameInput.value = '';
+        productDescriptionInput.value = '';
         productPriceInput.value = '';
         productCategorySelect.value = '';
         isHotCheckbox.checked = false;
@@ -78,6 +106,7 @@
 
             currentProductId = data.product.id;
             productNameInput.value = data.product.product_name;
+            productDescriptionInput.value = data.product.description || '';
             productPriceInput.value = data.product.price;
             productCategorySelect.value = data.product.category_id;
             isHotCheckbox.checked = data.product.isHot == 1;
@@ -107,11 +136,12 @@
         productSpinner?.classList.remove('hidden');
 
         const name = productNameInput.value.trim();
+        const description = productDescriptionInput.value.trim();
         const price = productPriceInput.value.trim();
         const category = productCategorySelect.value;
         const isHot = isHotCheckbox.checked ? 1 : 0;
         const isActive = isActiveCheckbox.checked ? 1 : 0;
-        const file = productFileInput.files[0];
+        const files = productFileInput.files;
 
         if (!name || !price || !category) {
             showToast('Please fill all required fields.', 'warning');
@@ -121,12 +151,17 @@
 
         const formData = new FormData();
         formData.append('product_name', name);
+        formData.append('description', description);
         formData.append('price', price);
         formData.append('category_id', category);
         formData.append('isHot', isHot);
         formData.append('isActive', isActive);
-        if (file) formData.append('file', file);
-
+        if (files && files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                formData.append('attachments[]', files[
+                    i]); // Use 'attachments[]' to match the form input name
+            }
+        }
         let url = '';
         let method = 'POST';
         const action = productSaveButton.getAttribute('data-action');
@@ -168,7 +203,7 @@
 
             showToast(data.message || 'Product saved successfully!', 'success');
             closeProductModal();
-            setTimeout(() => location.reload(), 1000);
+            // setTimeout(() => location.reload(), 1000);
         } catch (err) {
             console.error(err);
             showToast('Network or server error.', 'error');

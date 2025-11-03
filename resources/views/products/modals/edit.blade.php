@@ -17,6 +17,15 @@
                         class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
                         placeholder="Enter product name" required>
                 </div>
+                {{-- Product description --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Product Description
+                    </label>
+                    <textarea id="productDescription" name="product_description" rows="3"
+                        class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                        placeholder="Enter product description"></textarea>
+                </div>
 
                 {{-- Price --}}
                 <div>
@@ -62,14 +71,15 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Product Image
                     </label>
-                    <input type="file" id="productFile" name="file"
+                    <input type="file" id="productFile" name="attachments[]" multiple
                         class="mt-1 w-full text-sm text-gray-600 dark:text-gray-300
                         file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
                         file:text-sm file:font-semibold
                         file:bg-blue-600 file:text-white hover:file:bg-blue-700">
-                    <div class="mt-3">
+                    <div class="mt-3 flex flex-wrap" id="productPreviewContainer">
+                        {{-- Placeholder/Current Image (Optional - but good for edit mode) --}}
                         <img id="productPreview" src="{{ asset('asset/images/default-product.jpg') }}"
-                            class="w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700"
+                            class="w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2"
                             alt="Preview">
                     </div>
                 </div>
