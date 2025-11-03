@@ -45,7 +45,7 @@ Route::prefix('products')->middleware('auth')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('products.index');
     Route::post('/', [ProductController::class, 'store'])->name('products.store');
     Route::get('/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::match(['put', 'patch'], '/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::match(['put', 'patch'], '/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 

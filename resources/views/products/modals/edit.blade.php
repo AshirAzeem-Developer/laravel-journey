@@ -22,7 +22,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Product Description
                     </label>
-                    <textarea id="productDescription" name="product_description" rows="3"
+                    <textarea id="productDescription" name="description" rows="3"
                         class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
                         placeholder="Enter product description"></textarea>
                 </div>
