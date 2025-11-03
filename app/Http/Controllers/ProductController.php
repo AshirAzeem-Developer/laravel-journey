@@ -104,7 +104,7 @@ class ProductController extends Controller
                 'price' => $product->price,
                 'isHot' => $product->isHot,
                 'isActive' => $product->isActive,
-                'image_path' => $product->image_path,
+                'attachments' => $product->attachments,
                 'category_name' => $product->category->category_name ?? null,
             ],
         ]);

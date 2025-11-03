@@ -60,6 +60,51 @@
         }
     });
 
+
+
+
+
+    // --- Helper function to render multiple attachments ---
+    function renderProductAttachments(attachments, containerId, isView = false) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Clear existing previews
+        container.innerHTML = '';
+
+        const defaultImgPath = "{{ asset('asset/images/default-product.jpg') }}";
+        const imagePaths = JSON.parse(attachments || '[]');
+
+        if (imagePaths.length > 0) {
+            imagePaths.forEach(path => {
+                const img = document.createElement('img');
+                img.src = `/storage/${path}`;
+                // Apply consistent styling
+                img.className =
+                    'w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2';
+                img.alt = 'Product Image';
+                container.appendChild(img);
+            });
+        }
+
+        // Always show a default placeholder if no images exist (especially useful for edit mode)
+        if (imagePaths.length === 0 || !isView) {
+            const defaultImg = document.createElement('img');
+            defaultImg.src = defaultImgPath;
+            // Use a slightly different class for the primary/default image in edit mode
+            defaultImg.className =
+                'w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2';
+            defaultImg.alt = 'Default Image';
+
+            // Only add the default if the container is empty or we are in a context where
+            // we need to see a placeholder (like the original single preview spot, which we are replacing)
+            if (imagePaths.length === 0) {
+                container.appendChild(defaultImg);
+            }
+        }
+    }
+
+
     // --- Toast Notification ---
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -112,10 +157,7 @@
             isHotCheckbox.checked = data.product.isHot == 1;
             isActiveCheckbox.checked = data.product.isActive == 1;
 
-            const defaultImg = "{{ asset('asset/images/default-product.jpg') }}";
-            productPreview.src = data.product.image_path ?
-                `/storage/${data.product.image_path}` :
-                defaultImg;
+            renderProductAttachments(data.product.attachments, 'productPreviewContainer', false);
 
             productTitle.textContent = 'Edit Product';
             productSaveButton.setAttribute('data-action', 'edit');
@@ -231,9 +273,7 @@
                 'Uncategorized';
             document.getElementById('viewProductHot').innerHTML = data.product.isHot ? 'Yes' : 'No';
             document.getElementById('viewProductActive').innerHTML = data.product.isActive ? 'Yes' : 'No';
-            document.getElementById('viewProductImage').src = data.product.image_path ?
-                `/storage/${data.product.image_path}` :
-                "{{ asset('asset/images/default-product.jpg') }}";
+            renderProductAttachments(data.product.attachments, 'viewProductImageContainer', true);
 
             // Show modal
             const modal = document.getElementById('viewProductModal');
@@ -279,6 +319,10 @@
         confirmDeleteProductBtn.disabled = false;
         deleteProductSpinner?.classList.add('hidden');
     }
+
+
+
+
 
     cancelDeleteProductBtn.addEventListener('click', closeDeleteProductModalHandler);
     closeDeleteProductModal.addEventListener('click', closeDeleteProductModalHandler);

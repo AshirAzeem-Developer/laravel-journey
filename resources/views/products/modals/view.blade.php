@@ -18,9 +18,12 @@
 
             <div class="mt-4">
                 <strong>Product Image:</strong>
-                <img id="viewProductImage" src="{{ asset('asset/images/default-product.jpg') }}" alt="Product Image"
-                    class="mt-2 rounded-lg w-40 h-40 object-cover border border-gray-300 dark:border-gray-700">
+                {{-- <img id="viewProductImage" src="{{ asset('asset/images/default-product.jpg') }}" alt="Product Image"
+                    class="mt-2 rounded-lg w-40 h-40 object-cover border border-gray-300 dark:border-gray-700"> --}}
+                <div class="flex flex-wrap" id="viewProductImageContainer">
+                </div>
             </div>
+
         </div>
 
         <div class="flex justify-end mt-6">
