@@ -224,23 +224,28 @@
             const res = await fetch(url, {
                 method,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
                 },
                 body: formData
             });
 
             const data = await res.json().catch(() => ({}));
 
-            console.log("Data ->", res);
-            console.log("Data (JSON) ->", data);
-            if (!res.ok || res.status !== 200) {
-                if (data.errors) {
-                    Object.values(data.errors).forEach(errs =>
-                        errs.forEach(msg => showToast(msg, 'error'))
-                    );
-                } else {
-                    showToast(data.message || 'Something went wrong.', 'error');
-                }
+            console.log("HTTP status:", res.status, "Response:", data);
+
+            if (res.status === 422 && data.errors) {
+                let msg = `<strong>${data.title}</strong><ul>`;
+                data.errors.forEach(e => (msg += `<li>${e}</li>`));
+                msg += '</ul>';
+                showToast(msg, 'error'); // use your toast/modal
+                resetButtonState();
+                return;
+            }
+
+            if (!res.ok || !data.success) {
+                showToast(data.message || 'Something went wrong.', 'error');
+                resetButtonState();
                 return;
             }
 
