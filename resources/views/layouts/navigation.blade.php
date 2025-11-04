@@ -164,7 +164,7 @@
 
         {{-- Dashboard Links --}}
         <div class="pt-2 pb-3 space-y-1 px-2">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="flex items-center">
+            <x-responsive-nav-link :href="route('adminDashboard')" :active="request()->routeIs('adminDashboard')" class="flex items-center">
                 <span class="material-symbols-rounded text-gray-500 dark:text-gray-400 text-xl mr-3">dashboard</span>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>

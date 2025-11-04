@@ -4,7 +4,7 @@
     @php
         // Ensure we have a reliable active section even if the controller didn't provide it
 if (!isset($activeSection)) {
-    if (request()->routeIs('dashboard')) {
+    if (request()->routeIs('adminDashboard')) {
         $activeSection = 'summary_stats';
     } else {
         // For the route named 'dashboard.section' the route parameter is 'section'
@@ -28,7 +28,7 @@ if (!isset($failedJobsCount)) {
 
     {{-- Sidenav Header (Logo and Brand Name) --}}
     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
-        <a class="flex items-center justify-center  py-3 " href="{{ route('dashboard') }}">
+        <a class="flex items-center justify-center  py-3 " href="{{ route('adminDashboard') }}">
             <img src="{{ asset('asset/images/logo1.png') }}" class="w-full h-auto rounded-lg" alt="main_logo">
             {{-- <span
                 class="ml-1 text-sm text-gray-900 dark:text-white font-bold">{{ config('app.name', 'Dashboard') }}</span> --}}
@@ -55,7 +55,7 @@ if (!isset($failedJobsCount)) {
             {{-- Dashboard Summary --}}
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ !isset($activeSection) || $activeSection === 'summary_stats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
-                    href="{{ route('dashboard') }}">
+                    href="{{ route('adminDashboard') }}">
                     <span
                         class="material-symbols-rounded mr-3 text-xl {{ !isset($activeSection) || $activeSection === 'summary_stats' ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                         dashboard

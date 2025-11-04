@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     // Method for the main dashboard screen (Summary)
-    public function index(): View
+    public function index(): View | RedirectResponse
     {
         $summaryData = [
             'totalUsers' => User::count(),
@@ -18,11 +20,19 @@ class DashboardController extends Controller
             'totalJobs' => DB::table('jobs')->count(), // Pending jobs/queue data
             'lastLoggedInUser' => User::latest('updated_at')->first()->name ?? 'N/A', // Example of accessing user data
         ];
-        return view('dashboard.main', [
-            'summaryData' => $summaryData,
-            'viewPartial' => 'summary_stats', // We'll create this partial
-            'activeSection' => 'summary_stats',
-        ]);
+
+        $user = Auth::user();
+
+        if ($user && $user->designation === 'admin') {
+            return view('dashboard.main', [
+                'summaryData' => $summaryData,
+                'viewPartial' => 'summary_stats', // We'll create this partial
+                'activeSection' => 'summary_stats',
+            ]);
+        }
+
+        // If not admin, show a different view or data
+        return redirect()->route('website.home')->with('error', 'Access denied.');
     }
 
     public function edit(): View
@@ -66,5 +76,11 @@ class DashboardController extends Controller
             'activeSection' => $section,
             'viewPartial' => $viewPartial,
         ]);
+    }
+
+    public function show(): View
+    {
+        // Logic to show profile
+        return view('auth.login');
     }
 }

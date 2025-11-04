@@ -93,33 +93,42 @@
 
                             {{-- Session Check Logic (Converted to Blade @if with static variables) --}}
                             {{-- @if (!$user_is_logged_in || $user_designation !== 'user') --}}
-                            @if (true)
+                            @guest
+
                                 <li><a href="#signin-modal" data-toggle="modal"
                                         class="text-xl font-medium hover:text-red-500">Sign in / Sign up</a></li>
-                            @endif
 
+                            @endguest
                             {{-- @if ($user_is_logged_in && ($user_designation === 'user' || $user_designation === 'admin')) --}}
-                            @if (false)
+
+
+                            @auth
+
                                 <li class="relative">
                                     <div class="header-dropdown">
                                         <a href="#">Hello,
-                                            {{ $user_designation === 'user' ? 'User' : 'Admin' }}</a>
+                                            {{ Auth::user()->name }}</a>
                                         <div class="header-menu">
                                             <ul>
                                                 {{-- Removed 'dashboard.php' link since it was commented --}}
-                                                @if ($user_designation === 'user')
-                                                    <li><a href="orders.php">Orders</a></li>
-                                                    <li><a href="profile.php">Profile</a></li>
-                                                    <li><a href="logout.php">Logout</a></li>
-                                                @elseif ($user_designation === 'admin')
-                                                    <li><a href="admin/dashboard.php">Admin Dashboard</a></li>
-                                                    <li><a href="logout.php">Logout</a></li>
-                                                @endif
+
+                                                <li><a href="#">Orders</a></li>
+                                                <li><a href="#">Profile</a></li>
+                                                <form method="POST" action="{{ route('logout') }}">
+                                                    @csrf
+                                                    <x-dropdown-link :href="route('logout')"
+                                                        onclick="event.preventDefault(); this.closest('form').submit();"
+                                                        class="flex items-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                        <span class="material-symbols-rounded text-lg mr-3">logout</span>
+
+                                                    </x-dropdown-link>
+                                                </form>
+
                                             </ul>
                                         </div>
                                     </div>
                                 </li>
-                            @endif
+                            @endauth
                         </ul>
                     </li>
                 </ul>
