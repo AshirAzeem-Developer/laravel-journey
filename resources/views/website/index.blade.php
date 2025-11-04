@@ -113,7 +113,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Kharido.pk - eCommerce </title>
-    {{-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> --}}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet"
         href={{ asset('storeAssets/vendor/line-awesome/line-awesome/line-awesome/css/line-awesome.min.css') }}>
     <link rel="stylesheet" href={{ asset('storeAssets/css/bootstrap.min.css') }}>
@@ -557,16 +557,17 @@
                             <div class="tab-content" id="tab-content-5">
                                 <div class="tab-pane fade show active" id="signin" role="tabpanel"
                                     aria-labelledby="signin-tab">
-                                    <form method="POST" action="sign-in.php">
+                                    <form method="POST" action="{{ route('login') }}">
+                                        @csrf
                                         <div class="form-group">
                                             <label for="signin-email">Email address *</label>
-                                            <input type="email" class="form-control" id="signin-email"
+                                            <input type="email" class="form-control text-xl" id="signin-email"
                                                 name="email" required>
                                         </div>
 
                                         <div class="form-group">
                                             <label for="signin-password">Password *</label>
-                                            <input type="password" class="form-control" id="signin-password"
+                                            <input type="password" class="form-control text-xl" id="signin-password"
                                                 name="password" required>
                                         </div>
 
@@ -607,60 +608,62 @@
                                 </div>
                                 <div class="tab-pane fade" id="register" role="tabpanel"
                                     aria-labelledby="register-tab">
-                                    {{-- Since PHP form logic is removed, we hardcode empty values for a clean static form --}}
-                                    <form method="POST">
-                                        <div class="row">
-                                            <div class="form-group col-md-6">
-                                                <label class="form-label">First Name</label>
-                                                <div class="input-group input-group-outline mb-1">
-                                                    <input type="text" class="form-control" name="firstname"
-                                                        value="" />
-                                                </div>
-                                                {{-- Removed PHP error messages --}}
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label class="form-label">Last Name</label>
-                                                <div class="input-group input-group-outline mb-1">
-                                                    <input type="text" class="form-control" name="lastname"
-                                                        value="" />
-                                                </div>
-                                            </div>
+
+                                    <form method="POST" action="{{ route('admin.register') }}">
+                                        @csrf
+
+                                        <div class="my-2">
+                                            <x-input-label for="name" :value="__('Name')"
+                                                class="text-2xl font-medium text-gray-700 block mb-1" />
+                                            <x-text-input id="name"
+                                                class="w-full px-3 py-3 text-2xl  border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
+                                                type="text" name="name" :value="old('name')" required autofocus
+                                                autocomplete="name" />
+                                            <x-input-error :messages="$errors->get('name')" class="mt-2 text-sm text-red-500" />
                                         </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Phone Number</label>
-                                            <div class="input-group input-group-outline mb-1">
-                                                <input type="tel" class="form-control" name="phone_number"
-                                                    value="" />
-                                            </div>
+
+                                        <div class="my-2">
+                                            <x-input-label for="email" :value="__('Email')"
+                                                class="text-2xl font-medium text-gray-700 block mb-1" />
+                                            <x-text-input id="email"
+                                                class="w-full px-3 py-3 text-2xl border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
+                                                type="email" name="email" :value="old('email')" required
+                                                autocomplete="username" />
+                                            <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-red-500" />
                                         </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Email</label>
-                                            <div class="input-group input-group-outline mb-1">
-                                                <input type="email" class="form-control" name="email"
-                                                    value="" />
-                                            </div>
+
+                                        <div class="my-2">
+                                            <x-input-label for="password" :value="__('Password')"
+                                                class="text-2xl font-medium text-gray-700 block mb-1" />
+                                            <x-text-input id="password"
+                                                class="w-full px-3 py-3 text-2xl border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
+                                                type="password" name="password" required
+                                                autocomplete="new-password" />
+                                            <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-red-500" />
                                         </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Password</label>
-                                            <div class="input-group input-group-outline mb-1">
-                                                <input type="password" class="form-control" name="password" />
-                                            </div>
+
+                                        <div class="mb-6">
+                                            <x-input-label for="password_confirmation" :value="__('Confirm Password')"
+                                                class="text-2xl font-medium text-gray-700 block mb-1" />
+                                            <x-text-input id="password_confirmation"
+                                                class="w-full px-3 py-3 text-2xl border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
+                                                type="password" name="password_confirmation" required
+                                                autocomplete="new-password" />
+                                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm text-red-500" />
                                         </div>
-                                        <div class="form-footer">
-                                            <button type="submit" class="btn btn-outline-primary-2">
-                                                <span>SIGN UP</span>
-                                                <i class="icon-long-arrow-right"></i>
+                                        {{-- Designation Hidden Input --}}
+                                        <input type="hidden" name="designation" value="user">
+
+                                        <div class="flex flex-col items-center justify-between mt-4">
+                                            <button type="submit"
+                                                class="w-full px-4 py-3 text-white font-bold bg-gray-900 rounded-lg hover:bg-gray-800 transition duration-300">
+                                                {{ __('Register') }}
                                             </button>
-                                            <div class="custom-control custom-checkbox">
-                                                {{-- Always show unchecked for a static page register form --}}
-                                                <input class="custom-control-input" type="checkbox" value="agreed"
-                                                    id="flexCheckDefault" name="terms" />
-                                                <label class="custom-control-label" for="flexCheckDefault">
-                                                    I agree to the
-                                                    <a href="javascript:;" class="text-dark font-weight-bolder">Terms
-                                                        and Conditions</a>
-                                                </label>
-                                            </div>
+
+                                            <a class="text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4"
+                                                href="{{ route('login') }}">
+                                                {{ __('Already registered? Login Now') }}
+                                            </a>
                                         </div>
                                     </form>
                                     <div class="form-choice">

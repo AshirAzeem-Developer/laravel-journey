@@ -150,7 +150,7 @@
                         height="25">
                 </a>
             </div>
-
+            {{--
             <div class="header-center flex-grow mx-12">
                 <div class="header-search header-search-extended header-search-visible d-none d-lg-block">
                     <a href="#" class="search-toggle" role="button"><i class="icon-search"></i></a>
@@ -158,47 +158,18 @@
                         <div
                             class="header-search-wrapper search-wrapper-wide flex items-center border rounded-full overflow-hidden">
                             <label for="q" class="sr-only">Search</label>
-                            {{-- Added Tailwind classes to make the search button look better statically --}}
                             <button class="btn btn-primary bg-transparent p-2" type="submit">
-                                <i class="icon-search text-lg text-blue-500"></i>
+                                <i class="icon-search text-4xl text-blue-500"></i>
                             </button>
                             <input type="search" class="form-control flex-grow border-none focus:ring-0 px-3 py-2"
                                 name="q" id="q" placeholder="Search product ..." required>
                         </div>
                     </form>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="header-right flex items-center space-x-6">
-                {{-- Compare Dropdown (Static) --}}
-                <div class="dropdown compare-dropdown hidden md:block">
-                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="false" data-display="static" title="Compare Products">
-                        <div class="icon">
-                            <i class="icon-random"></i>
-                        </div>
-                        <p>Compare</p>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <ul class="compare-products">
-                            <li class="compare-product">
-                                <a href="#" class="btn-remove" title="Remove Product"><i
-                                        class="icon-close"></i></a>
-                                <h4 class="compare-product-title"><a href="product.html">Blue Night Dress</a></h4>
-                            </li>
-                            <li class="compare-product">
-                                <a href="#" class="btn-remove" title="Remove Product"><i
-                                        class="icon-close"></i></a>
-                                <h4 class="compare-product-title"><a href="product.html">White Long Skirt</a></h4>
-                            </li>
-                        </ul>
-                        <div class="compare-actions">
-                            <a href="#" class="action-link">Clear All</a>
-                            <a href="#" class="btn btn-outline-primary-2"><span>Compare</span><i
-                                    class="icon-long-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
+
 
                 {{-- Wishlist (Static) --}}
                 <div class="wishlist hidden md:block">
@@ -213,8 +184,8 @@
 
                 {{-- Cart Dropdown (Uses Static Cart Data) --}}
                 <div class="dropdown cart-dropdown">
-                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" data-display="static">
+                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false" data-display="static">
                         <div class="icon">
                             <i class="icon-shopping-cart"></i>
                             {{-- Blade output for static count --}}
