@@ -125,15 +125,6 @@
     function openAddProductModal() {
         addProductModal.classList.remove('hidden');
         addProductModal.classList.add('flex');
-        productTitle.textContent = 'Add New Product';
-        productNameInput.value = '';
-        productDescriptionInput.value = '';
-        productPriceInput.value = '';
-        productCategorySelect.value = '';
-        isHotCheckbox.checked = false;
-        isActiveCheckbox.checked = true;
-        productFileInput.value = '';
-        productPreview.src = '{{ asset('asset/images/default-product.jpg') }}';
 
     }
 
@@ -161,9 +152,7 @@
             productCategorySelect.value = product.category_id;
             isHotCheckbox.checked = product.isHot == 1;
             isActiveCheckbox.checked = product.isActive == 1;
-
-            renderProductAttachments(product.attachments, 'productPreviewContainer', false);
-
+            renderProductAttachments(product.attachments, 'productPreviewContainer', true);
             productTitle.textContent = 'Edit Product';
             productModal.classList.remove('hidden');
             productModal.classList.add('flex');
@@ -268,12 +257,6 @@
     // ======================
     async function fetchAndOpenViewProductModal(product) {
         try {
-            // const res = await fetch(`{{ url('/products') }}/${id}`);
-
-            // const data = await res.json();
-
-
-
             console.log("Product Details->", product)
             // Fill modal fields
             document.getElementById('viewProductName').innerHTML = product.product_name;

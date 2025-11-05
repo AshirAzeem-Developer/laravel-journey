@@ -29,14 +29,24 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+
+        // dd($request->all());
+        // die();
+
+        $request->merge([
+            'isHot' => $request->has('isHot') ? 1 : 0,
+            'isActive' => $request->has('isActive') ? 1 : 0,
+        ]);
+
         $rules = [
             'product_name' => 'required|string|max:255',
-            'description'  => 'nullable|string',
+            'description'  => 'required|string',
             'price'        => 'required|numeric|min:1',
             'category_id'  => 'required|exists:tbl_categories,id',
             'isHot'        => 'boolean',
             'isActive'     => 'boolean',
-            'attachments.*' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:2048',
+            'attachments'  => 'required|array|min:1',
+            'attachments.*' => 'required|file|mimes:jpeg,jpg,png,gif|max:2048',
         ];
 
         $messages = [
@@ -53,7 +63,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return $this->validationErrorResponse($validator);
+            return back()->withInput()->with('error', '❌ Failed to add product. Please try again.' . $validator->errors()->first());
         }
 
         try {
@@ -73,14 +83,10 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Product “' . e($product->product_name) . '” added successfully!',
-                'product' => $product,
-            ]);
+            return redirect()->route('products.index')->with('success', '✅ Product “' . e($product->product_name) . '” added successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return $this->serverErrorResponse('Failed to save product.', $e);
+            return back()->withInput()->with('error', '❌ Failed to add product. Please try again.' . $e->getMessage());
         }
     }
     /**

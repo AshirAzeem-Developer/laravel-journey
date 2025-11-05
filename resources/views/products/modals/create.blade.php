@@ -5,40 +5,86 @@
         <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="space-y-4">
+                {{-- Product Name --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
-                    <input type="text" name="name" required
-                        class="w-full mt-1 rounded-lg border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Product Name
+                    </label>
+                    <input type="text" id="addProductName" name="product_name"
+                        class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                        placeholder="Enter product name">
+                </div>
+                {{-- Product description --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Product Description
+                    </label>
+                    <textarea id="addProductDescription" name="description" rows="3"
+                        class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                        placeholder="Enter product description"></textarea>
                 </div>
 
+                {{-- Price --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                    <select name="category_id" required
-                        class="w-full mt-1 rounded-lg border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Price
+                    </label>
+                    <input type="number" id="addProductPrice" name="price" step="0.01"
+                        class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
+                        placeholder="Enter product price">
+                </div>
+
+                {{-- Category --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Category
+                    </label>
+                    <select id="addProductCategory" name="category_id"
+                        class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100">
+                        <option value="">Select Category</option>
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                         @endforeach
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-                    <input type="number" step="0.01" name="price" required
-                        class="w-full mt-1 rounded-lg border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                {{-- Status Checkboxes --}}
+                <div class="flex items-center gap-6">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="addProductHot" name="isHot"
+                            class="rounded text-blue-600 dark:bg-gray-900">
+                        <span class="text-gray-700 dark:text-gray-300">Hot Product</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="addProductActive" name="isActive"
+                            class="rounded text-green-600 dark:bg-gray-900" checked>
+                        <span class="text-gray-700 dark:text-gray-300">Active</span>
+                    </label>
                 </div>
 
+                {{-- File Upload --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                    <select name="status"
-                        class="w-full mt-1 rounded-lg border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <option value="active">Active</option>
-                        <option value="hot">Hot</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Product Image
+                    </label>
+                    <input type="file" id="productFile" name="attachments[]" multiple
+                        class="mt-1 w-full text-sm text-gray-600 dark:text-gray-300
+                        file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    <x-input-error :messages="$errors->get('attachments')" class="mt-2 text-sm text-red-500" />
+                    <div class="mt-3 flex flex-wrap" id="productPreviewContainer">
+
+                        <img id="productPreview" src="{{ asset('asset/images/default-product.jpg') }}"
+                            class="w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2"
+                            alt="Preview">
+                    </div>
                 </div>
             </div>
 
+
             <div class="flex justify-end gap-2 mt-6">
-                <button type="button" onclick="toggleModal('createProductModal')"
+                <button type="button" onclick="closeAddProductModal()"
                     class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-white rounded-lg hover:bg-gray-400">
                     Cancel
                 </button>
