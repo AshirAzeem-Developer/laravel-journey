@@ -85,12 +85,12 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                                            <button onclick="fetchAndOpenViewProductModal({{ $product->id }})"
+                                            <button onclick="fetchAndOpenViewProductModal({{ $product }})"
                                                 class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200 transition">
                                                 View
                                             </button>
                                             <!-- Edit -->
-                                            <button onclick="fetchAndOpenEditProductModal({{ $product->id }})"
+                                            <button onclick="fetchAndOpenEditProductModal({{ $product }})"
                                                 class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition">
                                                 Edit
                                             </button>

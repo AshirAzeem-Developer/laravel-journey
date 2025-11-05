@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 // ========================
@@ -13,7 +15,13 @@ use Illuminate\Support\Facades\Route;
 
 // Home page (Ecommerce website)
 Route::get('/', function () {
-    return view('website.index'); // this should be your frontend home
+
+    $data = [
+        'categories' => Category::all(),
+        'products' => Product::all(),
+    ];
+
+    return view('website.index', $data);
 })->name('website.home');
 
 

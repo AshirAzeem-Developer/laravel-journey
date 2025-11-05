@@ -143,22 +143,18 @@
     // ======================
     // EDIT PRODUCT MODAL
     // ======================
-    async function fetchAndOpenEditProductModal(id) {
+    async function fetchAndOpenEditProductModal(product) {
         try {
-            const res = await fetch(`{{ url('/products') }}/${id}`);
-            const data = await res.json();
-            if (!data.success) throw new Error('Fetch failed');
+            console.log("Product Selected Data -> ", product);
+            currentProductId = product.id;
+            productNameInput.value = product.product_name;
+            productDescriptionInput.value = product.description || '';
+            productPriceInput.value = product.price;
+            productCategorySelect.value = product.category_id;
+            isHotCheckbox.checked = product.isHot == 1;
+            isActiveCheckbox.checked = product.isActive == 1;
 
-            console.log("Product Selected Data -> ", data);
-            currentProductId = data.product.id;
-            productNameInput.value = data.product.product_name;
-            productDescriptionInput.value = data.product.description || '';
-            productPriceInput.value = data.product.price;
-            productCategorySelect.value = data.product.category_id;
-            isHotCheckbox.checked = data.product.isHot == 1;
-            isActiveCheckbox.checked = data.product.isActive == 1;
-
-            renderProductAttachments(data.product.attachments, 'productPreviewContainer', false);
+            renderProductAttachments(product.attachments, 'productPreviewContainer', false);
 
             productTitle.textContent = 'Edit Product';
             productSaveButton.setAttribute('data-action', 'edit');
@@ -263,23 +259,25 @@
     // ======================
     // VIEW PRODUCT MODAL
     // ======================
-    async function fetchAndOpenViewProductModal(id) {
+    async function fetchAndOpenViewProductModal(product) {
         try {
-            const res = await fetch(`{{ url('/products') }}/${id}`);
+            // const res = await fetch(`{{ url('/products') }}/${id}`);
 
-            const data = await res.json();
-            console.log("Product Details->", data)
-            if (!data.success) throw new Error('Failed to fetch');
+            // const data = await res.json();
 
+
+
+            console.log("Product Details->", product)
+            d
             // Fill modal fields
-            document.getElementById('viewProductName').innerHTML = data.product.product_name;
-            document.getElementById('viewProductDescription').innerHTML = data.product.description || 'N/A';
-            document.getElementById('viewProductPrice').innerHTML = `$${data.product.price}`;
-            document.getElementById('viewProductCategory').innerHTML = data.product.category_name ??
+            document.getElementById('viewProductName').innerHTML = product.product_name;
+            document.getElementById('viewProductDescription').innerHTML = product.description || 'N/A';
+            document.getElementById('viewProductPrice').innerHTML = `$${product.price}`;
+            document.getElementById('viewProductCategory').innerHTML = product.category_name ??
                 'Uncategorized';
-            document.getElementById('viewProductHot').innerHTML = data.product.isHot ? 'Yes' : 'No';
-            document.getElementById('viewProductActive').innerHTML = data.product.isActive ? 'Yes' : 'No';
-            renderProductAttachments(data.product.attachments, 'viewProductImageContainer', true);
+            document.getElementById('viewProductHot').innerHTML = product.isHot ? 'Yes' : 'No';
+            document.getElementById('viewProductActive').innerHTML = product.isActive ? 'Yes' : 'No';
+            renderProductAttachments(product.attachments, 'viewProductImageContainer', true);
 
             // Show modal
             const modal = document.getElementById('viewProductModal');
