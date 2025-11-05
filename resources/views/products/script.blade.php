@@ -17,6 +17,7 @@
     const productSaveButton = document.getElementById('saveProductButton');
     const productSpinner = document.getElementById('productSpinner');
     const productButtonText = document.getElementById('productButtonText');
+    const addProductModal = document.getElementById('createProductModal');
     let currentProductId = null;
 
     // --- Delete Modal Variables ---
@@ -122,6 +123,8 @@
     // ADD PRODUCT MODAL
     // ======================
     function openAddProductModal() {
+        addProductModal.classList.remove('hidden');
+        addProductModal.classList.add('flex');
         productTitle.textContent = 'Add New Product';
         productNameInput.value = '';
         productDescriptionInput.value = '';
@@ -131,8 +134,12 @@
         isActiveCheckbox.checked = true;
         productFileInput.value = '';
         productPreview.src = '{{ asset('asset/images/default-product.jpg') }}';
-        productModal.classList.remove('hidden');
-        productModal.classList.add('flex');
+
+    }
+
+    function closeAddProductModal() {
+        addProductModal.classList.add('hidden');
+        addProductModal.classList.remove('flex');
     }
 
     function closeProductModal() {
