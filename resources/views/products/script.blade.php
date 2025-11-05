@@ -27,6 +27,7 @@
     const cancelDeleteProductBtn = document.getElementById('cancelDeleteProductBtn');
     const closeDeleteProductModal = document.getElementById('closeDeleteProductModal');
     let deleteProductUrl = null;
+    const editForm = document.getElementById('editProductForm');
 
     // --- Image Preview ---
     productFileInput?.addEventListener('change', (event) => {
@@ -130,7 +131,6 @@
         isActiveCheckbox.checked = true;
         productFileInput.value = '';
         productPreview.src = '{{ asset('asset/images/default-product.jpg') }}';
-        productSaveButton.setAttribute('data-action', 'add');
         productModal.classList.remove('hidden');
         productModal.classList.add('flex');
     }
@@ -147,6 +147,7 @@
         try {
             console.log("Product Selected Data -> ", product);
             currentProductId = product.id;
+            editForm.action = "{{ url('admin_dashboard/Products') }}/" + currentProductId;
             productNameInput.value = product.product_name;
             productDescriptionInput.value = product.description || '';
             productPriceInput.value = product.price;
@@ -157,7 +158,6 @@
             renderProductAttachments(product.attachments, 'productPreviewContainer', false);
 
             productTitle.textContent = 'Edit Product';
-            productSaveButton.setAttribute('data-action', 'edit');
             productModal.classList.remove('hidden');
             productModal.classList.add('flex');
         } catch (error) {
@@ -169,92 +169,92 @@
     // ======================
     // ADD/EDIT SUBMISSION
     // ======================
-    productSaveButton.addEventListener('click', async () => {
-        productSaveButton.disabled = true;
-        productButtonText.textContent = '';
-        productSpinner?.classList.remove('hidden');
+    // productSaveButton.addEventListener('click', async () => {
+    //     productSaveButton.disabled = true;
+    //     productButtonText.textContent = '';
+    //     productSpinner?.classList.remove('hidden');
 
-        const name = productNameInput.value.trim();
-        const description = productDescriptionInput.value.trim();
-        const price = productPriceInput.value.trim();
-        const category = productCategorySelect.value;
-        const isHot = isHotCheckbox.checked ? 1 : 0;
-        const isActive = isActiveCheckbox.checked ? 1 : 0;
-        const files = productFileInput.files;
+    //     const name = productNameInput.value.trim();
+    //     const description = productDescriptionInput.value.trim();
+    //     const price = productPriceInput.value.trim();
+    //     const category = productCategorySelect.value;
+    //     const isHot = isHotCheckbox.checked ? 1 : 0;
+    //     const isActive = isActiveCheckbox.checked ? 1 : 0;
+    //     const files = productFileInput.files;
 
-        if (!name || !price || !category) {
-            showToast('Please fill all required fields.', 'warning');
-            resetButtonState();
-            return;
-        }
+    //     if (!name || !price || !category) {
+    //         showToast('Please fill all required fields.', 'warning');
+    //         resetButtonState();
+    //         return;
+    //     }
 
-        const formData = new FormData();
-        formData.append('product_name', name);
-        formData.append('description', description);
-        formData.append('price', price);
-        formData.append('category_id', category);
-        formData.append('isHot', isHot);
-        formData.append('isActive', isActive);
-        if (files && files.length > 0) {
-            for (let i = 0; i < files.length; i++) {
-                formData.append('attachments[]', files[
-                    i]); // Use 'attachments[]' to match the form input name
-            }
-        }
-        let url = '';
-        let method = 'POST';
-        const action = productSaveButton.getAttribute('data-action');
+    //     const formData = new FormData();
+    //     formData.append('product_name', name);
+    //     formData.append('description', description);
+    //     formData.append('price', price);
+    //     formData.append('category_id', category);
+    //     formData.append('isHot', isHot);
+    //     formData.append('isActive', isActive);
+    //     if (files && files.length > 0) {
+    //         for (let i = 0; i < files.length; i++) {
+    //             formData.append('attachments[]', files[
+    //                 i]); // Use 'attachments[]' to match the form input name
+    //         }
+    //     }
+    //     let url = '';
+    //     let method = 'POST';
+    //     const action = productSaveButton.getAttribute('data-action');
 
-        if (action === 'add') {
-            url = "{{ route('products.store') }}";
-        } else if (action === 'edit' && currentProductId) {
-            url = `{{ url('/products') }}/${currentProductId}`;
-            formData.append('_method', 'PATCH');
-        } else {
-            showToast('Invalid operation.', 'error');
-            resetButtonState();
-            return;
-        }
+    //     if (action === 'add') {
+    //         url = "{{ route('products.store') }}";
+    //     } else if (action === 'edit' && currentProductId) {
+    //         url = `{{ url('/products') }}/${currentProductId}`;
+    //         formData.append('_method', 'PATCH');
+    //     } else {
+    //         showToast('Invalid operation.', 'error');
+    //         resetButtonState();
+    //         return;
+    //     }
 
-        try {
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: formData
-            });
+    //     try {
+    //         const res = await fetch(url, {
+    //             method,
+    //             headers: {
+    //                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+    //                 'Accept': 'application/json'
+    //             },
+    //             body: formData
+    //         });
 
-            const data = await res.json().catch(() => ({}));
+    //         const data = await res.json().catch(() => ({}));
 
-            console.log("HTTP status:", res.status, "Response:", data);
+    //         console.log("HTTP status:", res.status, "Response:", data);
 
-            if (res.status === 422 && data.errors) {
-                let msg = `<strong>${data.title}</strong><ul>`;
-                data.errors.forEach(e => (msg += `<li>${e}</li>`));
-                msg += '</ul>';
-                showToast(msg, 'error'); // use your toast/modal
-                resetButtonState();
-                return;
-            }
+    //         if (res.status === 422 && data.errors) {
+    //             let msg = `<strong>${data.title}</strong><ul>`;
+    //             data.errors.forEach(e => (msg += `<li>${e}</li>`));
+    //             msg += '</ul>';
+    //             showToast(msg, 'error'); // use your toast/modal
+    //             resetButtonState();
+    //             return;
+    //         }
 
-            if (!res.ok || !data.success) {
-                showToast(data.message || 'Something went wrong.', 'error');
-                resetButtonState();
-                return;
-            }
+    //         if (!res.ok || !data.success) {
+    //             showToast(data.message || 'Something went wrong.', 'error');
+    //             resetButtonState();
+    //             return;
+    //         }
 
-            showToast(data.message || 'Product saved successfully!', 'success');
-            closeProductModal();
-            setTimeout(() => location.reload(), 1000);
-        } catch (err) {
-            console.error(err);
-            showToast('Network or server error.', 'error');
-        } finally {
-            resetButtonState();
-        }
-    });
+    //         showToast(data.message || 'Product saved successfully!', 'success');
+    //         closeProductModal();
+    //         setTimeout(() => location.reload(), 1000);
+    //     } catch (err) {
+    //         console.error(err);
+    //         showToast('Network or server error.', 'error');
+    //     } finally {
+    //         resetButtonState();
+    //     }
+    // });
 
     // ======================
     // VIEW PRODUCT MODAL

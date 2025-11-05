@@ -4,8 +4,9 @@
             Edit Product
         </h2>
 
-        <form id="editProductForm" enctype="multipart/form-data">
+        <form id="editProductForm" enctype="multipart/form-data" method="POST">
             @csrf
+            @method('PUT')
 
             <div class="space-y-4">
                 {{-- Product Name --}}
@@ -92,7 +93,7 @@
                     Cancel
                 </button>
 
-                <button id="saveProductButton" type="button"
+                <button id="saveProductButton1" type="submit"
                     class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
                     data-action="edit">
                     <span id="productButtonText">Update Product</span>

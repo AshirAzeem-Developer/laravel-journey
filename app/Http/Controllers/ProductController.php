@@ -111,13 +111,19 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        // Convert checkbox values before validation
+        $request->merge([
+            'isHot' => $request->has('isHot') ? 1 : 0,
+            'isActive' => $request->has('isActive') ? 1 : 0,
+        ]);
+
         $rules = [
-            'product_name' => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'price'        => 'required|numeric|min:1',
-            'category_id'  => 'required|exists:tbl_categories,id',
-            'isHot'        => 'boolean',
-            'isActive'     => 'boolean',
+            'product_name'  => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'price'         => 'required|numeric|min:1',
+            'category_id'   => 'required|exists:tbl_categories,id',
+            'isHot'         => 'boolean',
+            'isActive'      => 'boolean',
             'attachments.*' => 'sometimes|file|mimes:jpeg,jpg,png,gif|max:2048',
         ];
 
@@ -162,16 +168,14 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => '✅ Product “' . e($product->product_name) . '” updated successfully!',
-                'product' => $product->fresh(),
-            ]);
+            return redirect()->route('products.index')->with('success', '✅ Product “' . e($product->product_name) . '” updated successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
             return $this->serverErrorResponse('Failed to update product.', $e);
         }
     }
+
+
 
 
     /**
