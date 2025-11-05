@@ -268,7 +268,6 @@
 
 
             console.log("Product Details->", product)
-            d
             // Fill modal fields
             document.getElementById('viewProductName').innerHTML = product.product_name;
             document.getElementById('viewProductDescription').innerHTML = product.description || 'N/A';
