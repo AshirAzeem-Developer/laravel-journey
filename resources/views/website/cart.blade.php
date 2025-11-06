@@ -115,7 +115,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                         </h3>
                                                     </div>
                                                 </td>
-                                                <td class="price-col">Rs. {{ number_format($price) }}</td>
+                                                <td class="price-col">$ {{ number_format($price) }}</td>
 
                                                 <td class="quantity-col py-4 mr-8 ">
                                                     <div class="flex items-center justify-start space-x-1">
@@ -155,7 +155,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                     </div>
                                                 </td>
 
-                                                <td class="total-col">Rs. {{ number_format($subtotal) }}</td>
+                                                <td class="total-col">$ {{ number_format($subtotal) }}</td>
 
                                                 <td class="remove-col">
                                                     {{-- REMOVAL FORM (You already had this from the previous step) --}}
@@ -221,7 +221,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                             {{-- Subtotal Row --}}
                                             <tr class="summary-subtotal">
                                                 <td>Subtotal:</td>
-                                                <td>Rs. <span
+                                                <td>$ <span
                                                         id="cart-subtotal">{{ number_format($cartSubtotal, 2, '.', '') }}</span>
                                                 </td>
                                             </tr>
@@ -237,7 +237,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                             Shipping</label>
                                                     </div>
                                                 </td>
-                                                <td class="shipping-cost-display">Rs. 0.00</td>
+                                                <td class="shipping-cost-display">$ 0.00</td>
                                             </tr>
 
                                             <tr class="summary-shipping-row">
@@ -250,7 +250,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                             for="standart-shipping">Standard:</label>
                                                     </div>
                                                 </td>
-                                                <td class="shipping-cost-display">Rs. 10.00</td>
+                                                <td class="shipping-cost-display">$ 10.00</td>
                                             </tr>
 
                                             <tr class="summary-shipping-row">
@@ -263,7 +263,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                             for="express-shipping">Express:</label>
                                                     </div>
                                                 </td>
-                                                <td class="shipping-cost-display">Rs. 20.00</td>
+                                                <td class="shipping-cost-display">$ 20.00</td>
                                             </tr>
 
                                             <tr class="summary-shipping-estimate">
@@ -276,14 +276,15 @@ $final_img_path = 'admin_dashboard/' . $img;
                                             <tr class="summary-total">
                                                 <td>Total:</td>
                                                 {{-- DYNAMICALLY UPDATED FINAL TOTAL --}}
-                                                <td>Rs. <span
+                                                <td>$. <span
                                                         id="cart-final-total">{{ number_format($finalTotal, 2, '.', '') }}</span>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
 
-                                    <a href="#" class="btn btn-outline-primary-2 btn-order btn-block">PROCEED TO
+                                    <a href="{{ route('checkout') }}"
+                                        class="btn btn-outline-primary-2 btn-order btn-block">PROCEED TO
                                         CHECKOUT</a>
                                 </div>
                                 <a href="{{ url('/') }}"

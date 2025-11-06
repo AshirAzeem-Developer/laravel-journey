@@ -3,11 +3,14 @@
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ========================
@@ -31,6 +34,37 @@ Route::middleware(['auth'])->prefix('cart')->group(function () {
     Route::post('/', [CartController::class, 'store'])->name('cart.store'); // POST /api/cart
     Route::put('/{cartId}', [CartController::class, 'update'])->name('cart.update'); // PUT /api/cart/{id}
     Route::delete('/{cartId}', [CartController::class, 'destroy'])->name('cart.destroy'); // DELETE /api/cart/{id}
+});
+
+
+// ---------------- >> Order Routes << ----------------
+Route::middleware(['auth'])->prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orderConfirmation', [OrderController::class, 'index'])->name('orders.orderConfirmation');
+});
+
+Route::middleware(['auth'])->prefix('checkout')->group(function () {
+    Route::get('/', function () {
+
+        $userId = Auth::id();
+
+        $cartItems = Cart::where('user_id', $userId)
+            ->with('product') // Use the relationship defined in your Cart model
+            ->get();
+
+        // Calculate the subtotal (simple example)
+        $subtotal = $cartItems->sum(function ($item) {
+            // Assuming the Product model has a 'price' attribute
+            return optional($item->product)->price * $item->quantity;
+        });
+
+
+        return view('website.checkout', [
+            'cartItems' => $cartItems,
+            'subtotal' => round($subtotal, 2)
+        ]);
+    })->name('checkout');
+    Route::post('/', [OrderController::class, 'store'])->name('checkout.store');
 });
 
 
