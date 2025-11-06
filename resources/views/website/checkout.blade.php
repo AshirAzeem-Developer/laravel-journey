@@ -329,7 +329,7 @@
             const COD_BUTTON = $('#cod-submit-button');
             const PAYPAL_CONTAINER = $('#paypal-button-container');
 
-            // --- Dynamic Address Update Logic ---
+
             function updateAddressStrings() {
                 var currentAddress = [
                     $('input[name="address1"]').val(),
@@ -344,24 +344,12 @@
                 $('#billing_address_string_input').val(currentAddress);
             }
 
-            // --- CRITICAL FIX: Clean Up Individual Address Fields before submission ---
             function cleanAddressFields() {
-                // 1. Ensure the hidden fields are updated with the latest user input
                 updateAddressStrings();
-
-                // 2. Temporarily DISABLE all individual address fields.
-                // This prevents them from being serialized and sent to the server.
                 $('.individual-address-field').prop('disabled', true);
             }
 
-            // --- CRITICAL FIX: Re-enable fields after potential error/redirect ---
-            // If the user lands on this page via redirect (e.g., failed validation),
-            // the fields might be disabled from a previous failed submission. We re-enable them on load.
             $('.individual-address-field').prop('disabled', false);
-
-            // --- Event Listeners ---
-
-            // 1. Bind the address update logic to typing/changing fields
             $('.address-field').on('change keyup', updateAddressStrings);
 
             // Run address update on load
@@ -369,16 +357,11 @@
 
             // 2. Handle COD Submission (non-PayPal)
             $('#checkout-form').on('submit', function(e) {
-                // Run the cleanup immediately before the form submits
                 cleanAddressFields();
-
-                // Since this is a standard form submit, we return true to proceed.
                 return true;
             });
 
-            // 3. Payment Method Toggle Logic
             $('.payment-method-radio').on('change', function() {
-                // Before toggling visibility, ensure fields are enabled for editing if COD is selected
                 $('.individual-address-field').prop('disabled', false);
 
                 if ($(this).val() === 'paypal') {
@@ -402,7 +385,7 @@
                         document.getElementById('checkout-form').reportValidity();
                         return false;
                     }
-                    // Ensure hidden address strings are current before creating PayPal order
+
                     updateAddressStrings();
 
                     return actions.order.create({
@@ -416,7 +399,7 @@
                 },
                 onApprove: function(data, actions) {
                     return actions.order.capture().then(function(details) {
-                        // Submit form data to Laravel route for final processing
+
                         processServerPayment(data.orderID);
                     });
                 },
@@ -429,13 +412,9 @@
                 }
             }).render('#paypal-button-container');
 
-            // 5. Server-Side Finalization Function for PayPal (Manually submits form)
             function processServerPayment(paypalOrderID) {
-                // CRITICAL: We must clean and disable fields here too, as PayPal approval bypasses the form's submit handler
                 cleanAddressFields();
-
                 var formData = $('#checkout-form').serializeArray();
-
                 // Append custom payment fields
                 formData.push({
                     name: 'paypal_order_id',
@@ -458,7 +437,6 @@
                         value: field.value
                     }));
                 });
-
                 $('body').append(tempForm);
                 tempForm.submit();
             }
