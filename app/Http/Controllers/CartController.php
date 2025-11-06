@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Product; // Assuming you have a Product model for validation
 use Exception;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+
 use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
@@ -21,7 +23,14 @@ class CartController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+
+    public function show(): View
+    {
+        return view('website.cart');
+    }
+
+
+    public function index(Request $request): JsonResponse | View
     {
         // Get the ID of the currently authenticated user
         $userId = Auth::id();
@@ -42,8 +51,9 @@ class CartController extends Controller
             return optional($item->product)->price * $item->quantity;
         });
 
-        return response()->json([
-            'data' => $cartItems,
+
+        return view('website.cart', [
+            'cartItems' => $cartItems,
             'subtotal' => round($subtotal, 2)
         ]);
     }
@@ -138,29 +148,54 @@ class CartController extends Controller
      * @param int $cartId The primary key 'id' of the tbl_cart record
      * @return JsonResponse
      */
-    public function update(Request $request, int $cartId): JsonResponse
+    public function update(Request $request, int $cartId): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'quantity' => 'required|integer|min:1',
+        $userId = Auth::id();
+
+        if (!$userId) {
+            return redirect()->route('website.home')->with('error', 'Please log in to manage your cart.');
+        }
+
+        // Validate the action type
+        $request->validate([
+            'action' => ['required', Rule::in(['increment', 'decrement'])],
         ]);
 
         // Find the cart item, ensuring it belongs to the authenticated user
         $cartItem = Cart::where('id', $cartId)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->first();
 
         if (!$cartItem) {
-            return response()->json(['message' => 'Cart item not found or unauthorized.'], 404);
+            return back()->with('error', 'Cart item not found or unauthorized.');
         }
 
-        // Update the quantity
-        $cartItem->quantity = $validatedData['quantity'];
-        $cartItem->save();
+        $currentQuantity = $cartItem->quantity;
+        $action = $request->input('action');
+        $productName = $cartItem->product->product_name ?? 'Item';
 
-        return response()->json([
-            'message' => 'Cart item quantity updated.',
-            'cart_item' => $cartItem->load('product')
-        ]);
+        if ($action === 'increment') {
+            $cartItem->quantity = $currentQuantity + 1;
+            $message = "Quantity for **{$productName}** increased to {$cartItem->quantity}.";
+        } elseif ($action === 'decrement') {
+            // Prevent quantity from going below 1
+            if ($currentQuantity > 1) {
+                $cartItem->quantity = $currentQuantity - 1;
+                $message = "Quantity for **{$productName}** decreased to {$cartItem->quantity}.";
+            } else {
+                return back()->with('error', "Quantity for {$productName} cannot be less than 1. Use the remove button to delete the item.");
+            }
+        } else {
+            return back()->with('error', 'Invalid update action.');
+        }
+
+        try {
+            $cartItem->save();
+            return back()->with('success', $message);
+        } catch (Exception $e) {
+            Log::error("Cart update error: " . $e->getMessage());
+            return back()->with('error', 'Failed to update quantity due to a server error.');
+        }
     }
 
     /**

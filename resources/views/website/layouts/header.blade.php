@@ -161,8 +161,8 @@
                             </div>
 
                             <div class="dropdown-cart-action">
-                                <a href="cart.php" class="btn btn-primary">View Cart</a>
-                                <a href="checkout.php" class="btn btn-outline-primary-2">
+                                <a href="{{ route('cart.index') }}" class="btn btn-primary">View Cart</a>
+                                <a href="#" class="btn btn-outline-primary-2">
                                     <span>Checkout</span><i class="icon-long-arrow-right"></i>
                                 </a>
                             </div>
@@ -174,45 +174,46 @@
     </div>
 
     {{-- Bottom Header Section (Categories & Clearance) --}}
-    <div class="header-bottom sticky-header bg-white shadow-sm border-t border-gray-100">
-        <div class="container mx-auto px-4 flex justify-between items-center h-12">
-            <div class="header-left">
-                {{-- Category Dropdown (Static Categories) --}}
-                <div class="dropdown category-dropdown">
-                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="false" data-display="static" title="Browse Categories">
-                        Browse Categories <i class="icon-angle-down"></i>
-                    </a>
+    {{-- Show this only if the route is '/' --}}
+    @if (request()->is('/'))
+        <div class="header-bottom sticky-header bg-white shadow-sm border-t border-gray-100">
+            <div class="container mx-auto px-4 flex justify-between items-center h-12">
+                <div class="header-left">
+                    <div class="dropdown category-dropdown">
+                        <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false" data-display="static" title="Browse Categories">
+                            Browse Categories <i class="icon-angle-down"></i>
+                        </a>
 
-                    <div class="dropdown-menu">
-                        <nav class="side-nav">
-                            <ul class="menu-vertical sf-arrows">
-                                <li class="item-lead"><a href="#">Daily offers</a></li>
-                                <li class="item-lead"><a href="#">Gift Ideas</a></li>
+                        <div class="dropdown-menu">
+                            <nav class="side-nav">
+                                <ul class="menu-vertical sf-arrows">
+                                    <li class="item-lead"><a href="#">Daily offers</a></li>
+                                    <li class="item-lead"><a href="#">Gift Ideas</a></li>
 
-                                @if (!empty($all_categories))
-                                    @foreach ($all_categories as $category)
-                                        @php $category_link = "category.html?id=" . $category['id']; @endphp
-                                        <li>
-                                            <a href="{{ $category_link }}">
-                                                {{ htmlspecialchars($category['category_name']) }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                @else
-                                    <li><a href="#">No categories found</a></li>
-                                @endif
-                            </ul>
-                        </nav>
+                                    @if (!empty($all_categories))
+                                        @foreach ($all_categories as $category)
+                                            @php $category_link = "category.html?id=" . $category['id']; @endphp
+                                            <li>
+                                                <a href="{{ $category_link }}">
+                                                    {{ htmlspecialchars($category['category_name']) }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    @else
+                                        <li><a href="#">No categories found</a></li>
+                                    @endif
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- Clearance Message --}}
-            <div class="header-right text-sm font-medium flex items-center space-x-2">
-                <i class="la la-lightbulb-o text-yellow-500 text-lg"></i>
-                <p>Clearance<span class="highlight text-red-600 font-bold">&nbsp;Up to 30% Off</span></p>
+                <div class="header-right text-sm font-medium flex items-center space-x-2">
+                    <i class="la la-lightbulb-o text-yellow-500 text-lg"></i>
+                    <p>Clearance<span class="highlight text-red-600 font-bold">&nbsp;Up to 30% Off</span></p>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 </header>

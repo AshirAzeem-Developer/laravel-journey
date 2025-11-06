@@ -27,9 +27,9 @@ Route::get('/', function () {
 
 // -------- Cart Routes --------
 Route::middleware(['auth'])->prefix('cart')->group(function () {
-    Route::get('/', [CartController::class, 'index']); // GET /api/cart
+    Route::get('/', [CartController::class, 'index'])->name('cart.index'); // GET /api/cart
     Route::post('/', [CartController::class, 'store'])->name('cart.store'); // POST /api/cart
-    Route::put('/{cartId}', [CartController::class, 'update']); // PUT /api/cart/{id}
+    Route::put('/{cartId}', [CartController::class, 'update'])->name('cart.update'); // PUT /api/cart/{id}
     Route::delete('/{cartId}', [CartController::class, 'destroy'])->name('cart.destroy'); // DELETE /api/cart/{id}
 });
 
