@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Product; // Assuming you have a Product model for validation
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
@@ -51,50 +54,80 @@ class CartController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function store(Request $request): JsonResponse|RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $userId = Auth::id();
 
-        // Use Form Requests for more complex validation in a real application
-        $validatedData = $request->validate([
-            'product_id' => [
-                'required',
-                'integer',
-                // Ensure the product exists in the 'products' table (or whatever your product table is named)
-                Rule::exists('tbl_products', 'id'),
-            ],
-            'quantity' => 'required|integer|min:1',
-        ]);
+        // 1. Authentication Check
+        if (!$userId) {
+            // Unauthenticated users should be redirected to log in
+            return redirect()->route('website.home')->with('error', 'Please log in to add items to your cart.');
+        }
 
-        // Try to find the cart item for this user and product
-        $cartItem = Cart::where('user_id', $userId)
-            ->where('product_id', $validatedData['product_id'])
-            ->first();
-
-        if ($cartItem) {
-            // If the item exists, update its quantity (e.g., add to existing quantity)
-            $newQuantity = $cartItem->quantity + $validatedData['quantity'];
-            $cartItem->quantity = $newQuantity;
-            $cartItem->save();
-
-            return redirect()->back()->with('success', 'Cart quantity updated successfully.');
-        } else {
-            // If the item does not exist, create a new cart entry
-            $cartItem = Cart::create([
-                'user_id' => $userId,
-                'product_id' => $validatedData['product_id'],
-                'quantity' => $validatedData['quantity'],
+        try {
+            // 2. Validation
+            $validatedData = $request->validate([
+                'product_id' => [
+                    'required',
+                    'integer',
+                    // Using your specified product table: 'tbl_products'
+                    Rule::exists('tbl_products', 'id'),
+                ],
+                'quantity' => 'required|integer|min:1',
             ]);
 
-            return redirect()->back()->with([
-                'success' => 'Product added to cart successfully.',
-                'cart_item' => $cartItem->load('product')
-            ]);
+            $quantity = $validatedData['quantity'];
 
-            // return response()->json([
-            //     'message' => 'Product added to cart successfully.',
-            //     'cart_item' => $cartItem->load('product')
-            // ], 201);
+            // 3. Check for existing item
+            $cartItem = Cart::where('user_id', $userId)
+                ->where('product_id', $validatedData['product_id'])
+                ->first();
+
+            // 4. Processing Logic
+            if ($cartItem) {
+                // Item exists: update quantity
+                $oldQuantity = $cartItem->quantity;
+                $newQuantity = $oldQuantity + $quantity;
+
+                $cartItem->quantity = $newQuantity;
+                $cartItem->save();
+
+                $message = "Successfully added **{$quantity} more item(s)**. Total quantity is now **{$newQuantity}**.";
+            } else {
+                // Item is new: create a new cart entry
+                $cartItem = Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $validatedData['product_id'],
+                    'quantity' => $quantity,
+                ]);
+
+                // Eager load the product for a detailed message
+                $cartItem->load('product');
+                $productName = $cartItem->product->product_name ?? 'Product';
+
+                $message = "Successfully added **{$productName}** to your cart.";
+            }
+
+            // 5. Success Redirect
+            return back()->with('success', $message);
+        } catch (ValidationException $e) {
+            // Handle specific validation errors (e.g., product_id not found)
+
+            // If the failure is due to Rule::exists (product_id is missing/invalid)
+            if (isset($e->errors()['product_id']) && str_contains(implode('', $e->errors()['product_id']), 'selected product id is invalid')) {
+                $errorMessage = 'The item you tried to add could not be found. It may be out of stock or discontinued.';
+            } else {
+                // General validation error (e.g., quantity is zero)
+                $errorMessage = 'Please ensure the quantity is correct and try again.';
+            }
+
+            // Redirect back with validation error (flashing errors for the view partial)
+            return back()->withInput()->withErrors($e->errors())->with('error', $errorMessage);
+        } catch (Exception $e) {
+            // Handle unexpected database or server errors
+            Log::error("Cart store error for user {$userId}: " . $e->getMessage());
+
+            return back()->with('error', 'An internal error occurred. Your item could not be added. Please try again.');
         }
     }
 
