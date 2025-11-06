@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 // 👇 FRONTEND ROUTES
 // ========================
 
-// Home page (Ecommerce website)
+// ======================================== Home page (Ecommerce website) Routes =======================================
 Route::get('/', function () {
 
     $data = [
@@ -23,6 +24,15 @@ Route::get('/', function () {
 
     return view('website.index', $data);
 })->name('website.home');
+
+// -------- Cart Routes --------
+Route::middleware(['auth'])->prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index']); // GET /api/cart
+    Route::post('/', [CartController::class, 'store'])->name('cart.store'); // POST /api/cart
+    Route::put('/{cartId}', [CartController::class, 'update']); // PUT /api/cart/{id}
+    Route::delete('/{cartId}', [CartController::class, 'destroy']); // DELETE /api/cart/{id}
+});
+
 
 
 

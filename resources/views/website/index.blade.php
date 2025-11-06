@@ -59,7 +59,7 @@
 
     <div class="page-wrapper min-h-screen bg-gray-50">
         @include('website.layouts.header')
-
+        @include('website.components.toast')
 
 
         <main class="main">
