@@ -9,11 +9,6 @@
         ['id' => 15, 'category_name' => 'Audio & Video'],
         ['id' => 16, 'category_name' => 'Gaming Consoles'],
     ];
-
-    // --- REMOVED STATIC CART DATA ---
-    // The data below is now dynamically passed via the View Composer:
-    // $actualCartItems, $actualCartCount, $actualCartTotal
-
 @endphp
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,7 +29,6 @@
                         <a href="#"
                             class="text-sm text-gray-600 hover:text-blue-500 transition duration-300">Links</a>
                         <ul>
-                            {{-- Other static links... --}}
                             @guest
                                 <li><a href="#signin-modal" data-toggle="modal"
                                         class="text-xl font-medium hover:text-red-500">Sign in / Sign up</a></li>
@@ -77,31 +71,19 @@
                     <i class="icon-bars"></i>
                 </button>
 
-                <a href="index.php" class="logo">
-                    <img src={{ asset('storeAssets/images/demos/demo-4/logo.png') }} alt="Molla Logo" width="105"
+                <a href="{{ url('/') }}" class="logo">
+                    <img src="{{ asset('storeAssets/images/demos/demo-4/logo.png') }}" alt="Molla Logo" width="105"
                         height="25">
                 </a>
             </div>
 
             <div class="header-right flex items-center space-x-6">
-                {{-- Wishlist (Static) --}}
-                {{-- <div class="wishlist hidden md:block">
-                    <a href="wishlist.html" title="Wishlist">
-                        <div class="icon">
-                            <i class="icon-heart-o"></i>
-                            <span class="wishlist-count badge">3</span>
-                        </div>
-                        <p>Wishlist</p>
-                    </a>
-                </div> --}}
-
-                {{-- Cart Dropdown (NOW USES ACTUAL CART DATA) --}}
+                {{-- Cart Dropdown --}}
                 <div class="dropdown cart-dropdown">
                     <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false" data-display="static">
                         <div class="icon">
                             <i class="icon-shopping-cart"></i>
-                            {{-- DYNAMIC CART COUNT --}}
                             <span class="cart-count">{{ $actualCartCount ?? 0 }}</span>
                         </div>
                         <p>Cart</p>
@@ -109,9 +91,13 @@
 
                     <div class="dropdown-menu dropdown-menu-right">
                         <div class="dropdown-cart-products">
-                            {{-- DYNAMIC CART ITEMS LOOP --}}
                             @if (!empty($actualCartItems) && $actualCartItems->count() > 0)
                                 @foreach ($actualCartItems as $item)
+                                    @php
+                                        $attachments = json_decode($item->product->attachments ?? '[]', true);
+                                        $firstImage = $attachments[0] ?? null;
+                                    @endphp
+
                                     <div class="product">
                                         <div class="product-cart-details">
                                             <h4 class="product-title">
@@ -124,23 +110,23 @@
                                                 x ${{ number_format($item->product->price ?? 0, 2) }}
                                             </span>
                                         </div>
+
                                         <figure class="product-image-container">
                                             <a href="product.php?id={{ $item->product->id }}" class="product-image">
-                                                {{-- Assuming the Product model stores image attachment --}}
-                                                @if (!empty($item->product->attachments[0]))
-                                                    <img src="{{ asset('storage/' . $item->product->attachments[0]) }}"
+                                                @if ($firstImage)
+                                                    <img src="{{ asset('storage/' . $firstImage) }}"
                                                         alt="product image">
                                                 @else
-                                                    <img src="https://via.placeholder.com/60" alt="product image">
+                                                    <img src="{{ asset('storeAssets/images/placeholder.jpg') }}"
+                                                        alt="No image">
                                                 @endif
                                             </a>
                                         </figure>
-                                        {{-- ⚠️ THE REMOVAL FORM ⚠️ --}}
+
                                         <form action="{{ route('cart.destroy', ['cartId' => $item->id]) }}"
                                             method="POST" class="d-inline">
                                             @csrf
-                                            @method('DELETE') {{-- Method spoofing for DELETE request --}}
-
+                                            @method('DELETE')
                                             <button type="submit" class="btn-remove" title="Remove Product"
                                                 style="border: none; background: none; cursor: pointer; padding: 0;">
                                                 <i class="icon-close"></i>
@@ -153,7 +139,6 @@
                             @endif
                         </div>
 
-                        {{-- DYNAMIC CART TOTAL --}}
                         @if (!empty($actualCartItems) && $actualCartItems->count() > 0)
                             <div class="dropdown-cart-total">
                                 <span>Total</span>
@@ -174,7 +159,6 @@
     </div>
 
     {{-- Bottom Header Section (Categories & Clearance) --}}
-    {{-- Show this only if the route is '/' --}}
     @if (request()->is('/'))
         <div class="header-bottom sticky-header bg-white shadow-sm border-t border-gray-100">
             <div class="container mx-auto px-4 flex justify-between items-center h-12">

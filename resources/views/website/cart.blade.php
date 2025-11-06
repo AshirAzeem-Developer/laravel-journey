@@ -15,7 +15,6 @@
     <link rel="icon" type="image/png" sizes="16x16"
         href="{{ asset('storeAssets/images/icons/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ asset('storeAssets/images/icons/site.html') }}">
-    <link rel="mask-icon" href="{{ asset('storeAssets/images/icons/safari-pinned-tab.svg') }}" color="#666666">
     <link rel="shortcut icon" href="{{ asset('storeAssets/images/icons/favicon.ico') }}">
     <meta name="apple-mobile-web-app-title" content="Molla">
     <meta name="application-name" content="Molla">
@@ -72,54 +71,49 @@
                                     </thead>
 
                                     <tbody>
-
                                         @forelse ($cartItems as $item)
                                             @php
-                                                // Access Product data through the 'product' relationship
+                                                // Access related Product safely
                                                 $product = $item->product ?? null;
+
+                                                // Product details
+                                                $product_name = $product['product_name'] ?? 'Missing Product';
                                                 $price = $product['price'] ?? 0;
-                                                $subtotal = $price * $item['quantity'];
-                                                // dd($subt);
-                                                // Image logic (Assuming attachments is an array/JSON in the 'product' array)
-                                                // Since your debug showed 'attachments' => null, this logic assumes it should be accessed via product,
-                                                // but for null safety and showing a default, we simplify.
+                                                $subtotal = $price * ($item['quantity'] ?? 1);
+
+                                                // Handle image decoding
                                                 $attachments = $product['attachments'] ?? null;
 
-                                                // If $attachments is a JSON string, decode it. If it's a null/simple value, use it directly or a default. Based on the original PHP, we will try to handle both cases.
-$img_data = is_string($attachments)
-    ? json_decode($attachments, true)
-    : $attachments;
+                                                if (is_string($attachments)) {
+                                                    $attachments = json_decode($attachments, true);
+                                                }
 
-// Get the first image file_url, or use default
-$img =
-    $img_data[0]['file_url'] ??
-    ($img_data[0] ?? 'assets/images/default.png');
-
-// Assuming 'admin_dashboard' is the base path for uploaded images
-$final_img_path = 'admin_dashboard/' . $img;
-
-// Fallback for when the product relation is missing entirely (shouldn't happen with proper eager loading)
-                                                $product_name = $product['product_name'] ?? 'Missing Product';
+                                                // Get first image if available
+                                                $imagePath =
+                                                    !empty($attachments) && isset($attachments[0])
+                                                        ? asset('storage/' . $attachments[0])
+                                                        : asset('storeAssets/images/placeholder.jpg');
                                             @endphp
+
                                             <tr>
                                                 <td class="product-col">
                                                     <div class="product">
                                                         <figure class="product-media">
                                                             <a href="#">
-                                                                <img src="{{ asset($final_img_path) }}"
-                                                                    alt="{{ $product_name }}">
+                                                                <img src="{{ $imagePath }}"
+                                                                    alt="{{ $product_name }}"
+                                                                    style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
                                                             </a>
                                                         </figure>
-                                                        <h3 class="product-title">
-                                                            {{ $product_name }}
-                                                        </h3>
+                                                        <h3 class="product-title">{{ $product_name }}</h3>
                                                     </div>
                                                 </td>
+
                                                 <td class="price-col">$ {{ number_format($price) }}</td>
 
-                                                <td class="quantity-col py-4 mr-8 ">
-                                                    <div class="flex items-center justify-start space-x-1">
-                                                        {{-- Form for Decrement (Min Quantity 1) --}}
+                                                <td class="quantity-col py-4">
+                                                    <div class="flex items-center space-x-1">
+                                                        {{-- Decrease Quantity --}}
                                                         <form
                                                             action="{{ route('cart.update', ['cartId' => $item->id]) }}"
                                                             method="POST" class="inline">
@@ -127,19 +121,20 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                             @method('PUT')
                                                             <input type="hidden" name="action" value="decrement">
                                                             <button type="submit"
-                                                                class="px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-l-lg hover:bg-red-600 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                class="px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-l-lg hover:bg-red-600 transition disabled:opacity-50"
                                                                 {{ $item->quantity <= 1 ? 'disabled' : '' }}
                                                                 title="Decrease Quantity">
                                                                 <i class="fas fa-minus w-3 h-3"></i>
                                                             </button>
                                                         </form>
 
-                                                        {{-- Current Quantity Display --}}
+                                                        {{-- Current Quantity --}}
                                                         <div
                                                             class="px-3 py-2 text-center text-xl font-bold bg-gray-50 w-12">
-                                                            {{ $item['quantity'] }}</div>
+                                                            {{ $item['quantity'] }}
+                                                        </div>
 
-                                                        {{-- Form for Increment --}}
+                                                        {{-- Increase Quantity --}}
                                                         <form
                                                             action="{{ route('cart.update', ['cartId' => $item->id]) }}"
                                                             method="POST" class="inline">
@@ -147,7 +142,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                             @method('PUT')
                                                             <input type="hidden" name="action" value="increment">
                                                             <button type="submit"
-                                                                class="px-3 py-2 text-sm font-medium text-white bg-green-500 rounded-r-lg hover:bg-green-600 transition duration-150"
+                                                                class="px-3 py-2 text-sm font-medium text-white bg-green-500 rounded-r-lg hover:bg-green-600 transition"
                                                                 title="Increase Quantity">
                                                                 <i class="fas fa-plus w-3 h-3"></i>
                                                             </button>
@@ -158,14 +153,13 @@ $final_img_path = 'admin_dashboard/' . $img;
                                                 <td class="total-col">$ {{ number_format($subtotal) }}</td>
 
                                                 <td class="remove-col">
-                                                    {{-- REMOVAL FORM (You already had this from the previous step) --}}
                                                     <form
                                                         action="{{ route('cart.destroy', ['cartId' => $item->id]) }}"
-                                                        method="POST" class="d-inline">
+                                                        method="POST" class="inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
-                                                            class="text-red-600 hover:text-red-800 transition duration-150"
+                                                            class="text-red-600 hover:text-red-800 transition"
                                                             title="Remove Item">
                                                             <i class="fas fa-trash-alt w-4 h-4"></i>
                                                         </button>
@@ -178,6 +172,7 @@ $final_img_path = 'admin_dashboard/' . $img;
                                             </tr>
                                         @endforelse
                                     </tbody>
+
 
                                 </table>
                                 <div class="cart-bottom">

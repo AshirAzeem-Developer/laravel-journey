@@ -1,7 +1,7 @@
 @php
     // print_r($product['id']);
     $isNew = $product['created_at'] > now()->subDays(7);
-    // $attachments = json_decode($product['attachments'], true);
+    $attachments = json_decode($product['attachments'], true);
     // print_r($attachments[0] ?? 'No Image');
 @endphp
 <div class="product product-2" data-product-id="{{ $product['id'] }}">
@@ -12,8 +12,9 @@
         @if ($isNew)
             <span class="product-label label-circle label-new">New</span>
         @endif
-        @if (!empty($product->attachments))
-            <img src="{{ asset('storage/' . $product->attachments[0]) }}" alt="Product Image" class="product-image"
+        {{-- ✅ FIX: Decode JSON and use first image safely --}}
+        @if (!empty($attachments) && isset($attachments[0]))
+            <img src="{{ asset('storage/' . $attachments[0]) }}" alt="Product Image" class="product-image"
                 style="height: 300px; object-fit: cover;">
         @else
             <img src="{{ asset('storeAssets/images/placeholder.jpg') }}" alt="No Image" class="product-image"
