@@ -93,7 +93,7 @@
                                         <div class="col-sm-6">
                                             <label>First Name *</label>
                                             <input type="text"
-                                                class="form-control individual-address-field @error('firstname') is-invalid @enderror"
+                                                class=" text-2xl text-black  form-control individual-address-field @error('firstname') is-invalid @enderror"
                                                 name="firstname" value="{{ old('firstname', $user_data['firstname']) }}"
                                                 required />
                                             @error('firstname')
@@ -104,7 +104,7 @@
                                         <div class="col-sm-6">
                                             <label>Last Name *</label>
                                             <input type="text"
-                                                class="form-control individual-address-field @error('lastname') is-invalid @enderror"
+                                                class="text-2xl text-black form-control individual-address-field @error('lastname') is-invalid @enderror"
                                                 name="lastname" value="{{ old('lastname', $user_data['lastname']) }}"
                                                 required />
                                             @error('lastname')
@@ -114,12 +114,13 @@
                                     </div>
 
                                     <label>Company Name (Optional)</label>
-                                    <input type="text" class="form-control individual-address-field" name="company"
+                                    <input type="text"
+                                        class="text-2xl text-black form-control individual-address-field" name="company"
                                         value="{{ old('company') }}" />
 
                                     <label>Country *</label>
                                     <input type="text"
-                                        class="form-control individual-address-field @error('country') is-invalid @enderror"
+                                        class="text-2xl text-black form-control individual-address-field @error('country') is-invalid @enderror"
                                         name="country" value="Pakistan" required />
                                     @error('country')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -128,7 +129,7 @@
                                     <label>Street address *</label>
                                     {{-- Address Line 1 --}}
                                     <input type="text"
-                                        class="form-control address-field individual-address-field @error('address1') is-invalid @enderror"
+                                        class="text-2xl text-black form-control address-field individual-address-field @error('address1') is-invalid @enderror"
                                         name="address1" placeholder="House number and Street name"
                                         value="{{ $user_data['address1'] }}" required />
                                     @error('address1')
@@ -136,7 +137,9 @@
                                     @enderror
 
                                     {{-- Address Line 2 --}}
-                                    <input type="text" class="form-control address-field individual-address-field"
+                                    <label>Street address 2 (Optional)</label>
+                                    <input type="text"
+                                        class="text-2xl text-black form-control address-field individual-address-field"
                                         name="address2" placeholder="Appartments, suite, unit etc ..."
                                         value="{{ $user_data['address2'] }}" />
 
@@ -145,7 +148,7 @@
                                         <div class="col-sm-6">
                                             <label>Town / City *</label>
                                             <input type="text"
-                                                class="form-control address-field individual-address-field @error('city') is-invalid @enderror"
+                                                class="text-2xl text-black form-control address-field individual-address-field @error('city') is-invalid @enderror"
                                                 name="city" value="{{ $user_data['city'] }}" required />
                                             @error('city')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -155,7 +158,7 @@
                                         <div class="col-sm-6">
                                             <label>State / County *</label>
                                             <input type="text"
-                                                class="form-control address-field individual-address-field @error('state') is-invalid @enderror"
+                                                class="text-2xl text-black form-control address-field individual-address-field @error('state') is-invalid @enderror"
                                                 name="state" value="{{ $user_data['state'] }}" required />
                                             @error('state')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -168,7 +171,7 @@
                                         <div class="col-sm-6">
                                             <label>Postcode / ZIP *</label>
                                             <input type="text"
-                                                class="form-control address-field individual-address-field @error('postcode') is-invalid @enderror"
+                                                class="text-2xl text-black form-control address-field individual-address-field @error('postcode') is-invalid @enderror"
                                                 name="postcode" value="{{ $user_data['postcode'] }}" required />
                                             @error('postcode')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -178,7 +181,7 @@
                                         <div class="col-sm-6">
                                             <label>Phone *</label>
                                             <input type="tel"
-                                                class="form-control individual-address-field @error('phone_number') is-invalid @enderror"
+                                                class="text-2xl text-black form-control individual-address-field @error('phone_number') is-invalid @enderror"
                                                 name="phone_number" value="{{ $user_data['phone_number'] }}"
                                                 required />
                                             @error('phone_number')
@@ -188,7 +191,8 @@
                                     </div>
 
                                     <label>Email address *</label>
-                                    <input type="email" class="form-control individual-address-field" name="email"
+                                    <input type="email"
+                                        class="text-2xl text-black form-control individual-address-field" name="email"
                                         value="{{ $user_data['email'] }}" required readonly />
 
 
@@ -205,7 +209,7 @@
                                             different address?</label>
                                     </div>
                                     <label>Order notes (optional)</label>
-                                    <textarea class="form-control" cols="30" rows="4" name="order_notes"
+                                    <textarea class="text-2xl text-black form-control" cols="30" rows="4" name="order_notes"
                                         placeholder="Notes about your order, e.g. special notes for delivery">{{ old('order_notes') }}</textarea>
                                 </div>
 
@@ -319,9 +323,7 @@
     <script src="{{ asset('storeAssets/js/main.js') }}"></script>
 
     {{-- PayPal SDK using Blade interpolation for the public client ID --}}
-    <script
-        src="https://www.paypal.com/sdk/js?client-id=AXbmCprgHhbefFilx3Oy-8KocEGMBhNqOj01iirOVY1hdbpNG9ZcGmmi_Cw7AmeKHl7yA6veLp26SCSF&currency=USD">
-    </script>
+    <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID_PUBLIC') }}&currency=USD"></script>
 
     <script>
         $(document).ready(function() {
