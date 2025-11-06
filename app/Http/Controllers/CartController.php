@@ -136,17 +136,25 @@ class CartController extends Controller
      * @param int $cartId The primary key 'id' of the tbl_cart record
      * @return JsonResponse
      */
-    public function destroy(int $cartId): JsonResponse
+    public function destroy(int $cartId): RedirectResponse
     {
+        $userId = Auth::id();
+
+        if (!$userId) {
+            return redirect()->route('website.home')->with('error', 'Please log in to manage your cart.');
+        }
+
         // Find the cart item, ensuring it belongs to the authenticated user
         $deleted = Cart::where('id', $cartId)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->delete();
 
         if ($deleted) {
-            return response()->json(['message' => 'Cart item removed successfully.'], 200);
+            // Redirect back to the page with a success message
+            return back()->with('success', 'Item successfully removed from cart.');
         }
 
-        return response()->json(['message' => 'Cart item not found or unauthorized.'], 404);
+        // Redirect back with an error if the item wasn't found or wasn't authorized
+        return back()->with('error', 'Cart item not found or unauthorized to remove.');
     }
 }

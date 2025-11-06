@@ -1,8 +1,5 @@
 @php
-    // --- STATIC DUMMY DATA FOR FRONT-END PRESENTATION ---
-    // In a real Laravel application, this data would be passed from a controller.
-
-    // 1. Static Categories (for the dropdown menu)
+    // --- STATIC CATEGORIES (Keep these if you are passing them this way) ---
     $all_categories = [
         ['id' => 10, 'category_name' => 'Electronics'],
         ['id' => 11, 'category_name' => 'Appliances'],
@@ -13,45 +10,16 @@
         ['id' => 16, 'category_name' => 'Gaming Consoles'],
     ];
 
-    // 2. Static Cart Items (for the dropdown mini-cart)
-    // NOTE: In a static page, we simulate 2 items in the cart
-    $cart_items = [
-        [
-            'product_id' => 101,
-            'product_name' => 'High-Resolution Monitor',
-            'price' => 350.0,
-            'quantity' => 1,
-            'image' => 'products/product-1.jpg', // Dummy image path
-        ],
-        [
-            'product_id' => 205,
-            'product_name' => 'Wireless Mechanical Keyboard',
-            'price' => 120.0,
-            'quantity' => 2,
-            'image' => 'products/product-2.jpg',
-        ],
-    ];
+    // --- REMOVED STATIC CART DATA ---
+    // The data below is now dynamically passed via the View Composer:
+    // $actualCartItems, $actualCartCount, $actualCartTotal
 
-    // 3. Static Cart Totals and User Status
-    $cart_total = array_sum(
-        array_map(function ($item) {
-            return $item['price'] * $item['quantity'];
-        }, $cart_items),
-    );
-    $cart_count = array_sum(array_column($cart_items, 'quantity')); // Total quantity of items
-
-    // Simulation for user status
-    $user_is_logged_in = true; // Set to false to see the Sign in/Sign up link
-    $user_designation = 'user'; // 'user' or 'admin' or null
-    $user_name = 'John Doe';
 @endphp
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-
-
 <header class="header header-intro-clearance header-4 border-b border-gray-200">
-    {{-- Top Header Section with Tailwind classes --}}
+    {{-- Top Header Section --}}
     <div class="header-top bg-gray-100 py-2">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="header-left">
@@ -65,53 +33,19 @@
                     <li class="relative">
                         <a href="#"
                             class="text-sm text-gray-600 hover:text-blue-500 transition duration-300">Links</a>
-                        {{-- Dropdowns are kept simple, using existing HTML structure/classes --}}
                         <ul>
-                            <li>
-                                <div class="header-dropdown">
-                                    <a href="#">USD</a>
-                                    <div class="header-menu">
-                                        <ul>
-                                            <li><a href="#">Eur</a></li>
-                                            <li><a href="#">Usd</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="header-dropdown">
-                                    <a href="#">English</a>
-                                    <div class="header-menu">
-                                        <ul>
-                                            <li><a href="#">English</a></li>
-                                            <li><a href="#">French</a></li>
-                                            <li><a href="#">Spanish</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </li>
-
-                            {{-- Session Check Logic (Converted to Blade @if with static variables) --}}
-                            {{-- @if (!$user_is_logged_in || $user_designation !== 'user') --}}
+                            {{-- Other static links... --}}
                             @guest
-
                                 <li><a href="#signin-modal" data-toggle="modal"
                                         class="text-xl font-medium hover:text-red-500">Sign in / Sign up</a></li>
-
                             @endguest
-                            {{-- @if ($user_is_logged_in && ($user_designation === 'user' || $user_designation === 'admin')) --}}
-
 
                             @auth
-
                                 <li class="relative">
                                     <div class="header-dropdown">
-                                        <a href="#">Hello,
-                                            {{ Auth::user()->name }}</a>
+                                        <a href="#">Hello, {{ Auth::user()->name }}</a>
                                         <div class="header-menu">
                                             <ul>
-                                                {{-- Removed 'dashboard.php' link since it was commented --}}
-
                                                 <li><a href="#">Orders</a></li>
                                                 <li><a href="#">Profile</a></li>
                                                 <form method="POST" action="{{ route('logout') }}">
@@ -120,10 +54,8 @@
                                                         onclick="event.preventDefault(); this.closest('form').submit();"
                                                         class="flex items-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
                                                         <span class="material-symbols-rounded text-lg mr-3">logout</span>
-
                                                     </x-dropdown-link>
                                                 </form>
-
                                             </ul>
                                         </div>
                                     </div>
@@ -136,7 +68,7 @@
         </div>
     </div>
 
-    {{-- Middle Header Section with Tailwind classes --}}
+    {{-- Middle Header Section --}}
     <div class="header-middle py-6">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="header-left flex items-center">
@@ -150,29 +82,10 @@
                         height="25">
                 </a>
             </div>
-            {{--
-            <div class="header-center flex-grow mx-12">
-                <div class="header-search header-search-extended header-search-visible d-none d-lg-block">
-                    <a href="#" class="search-toggle" role="button"><i class="icon-search"></i></a>
-                    <form action="#" method="get">
-                        <div
-                            class="header-search-wrapper search-wrapper-wide flex items-center border rounded-full overflow-hidden">
-                            <label for="q" class="sr-only">Search</label>
-                            <button class="btn btn-primary bg-transparent p-2" type="submit">
-                                <i class="icon-search text-4xl text-blue-500"></i>
-                            </button>
-                            <input type="search" class="form-control flex-grow border-none focus:ring-0 px-3 py-2"
-                                name="q" id="q" placeholder="Search product ..." required>
-                        </div>
-                    </form>
-                </div>
-            </div> --}}
 
             <div class="header-right flex items-center space-x-6">
-
-
                 {{-- Wishlist (Static) --}}
-                <div class="wishlist hidden md:block">
+                {{-- <div class="wishlist hidden md:block">
                     <a href="wishlist.html" title="Wishlist">
                         <div class="icon">
                             <i class="icon-heart-o"></i>
@@ -180,48 +93,59 @@
                         </div>
                         <p>Wishlist</p>
                     </a>
-                </div>
+                </div> --}}
 
-                {{-- Cart Dropdown (Uses Static Cart Data) --}}
+                {{-- Cart Dropdown (NOW USES ACTUAL CART DATA) --}}
                 <div class="dropdown cart-dropdown">
                     <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false" data-display="static">
                         <div class="icon">
                             <i class="icon-shopping-cart"></i>
-                            {{-- Blade output for static count --}}
-                            <span class="cart-count">5</span>
+                            {{-- DYNAMIC CART COUNT --}}
+                            <span class="cart-count">{{ $actualCartCount ?? 0 }}</span>
                         </div>
                         <p>Cart</p>
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right">
                         <div class="dropdown-cart-products">
-                            {{-- Blade @if/@foreach structure to loop over static cart items --}}
-                            @if (!empty($cart_items))
-                                @foreach ($cart_items as $item)
+                            {{-- DYNAMIC CART ITEMS LOOP --}}
+                            @if (!empty($actualCartItems) && $actualCartItems->count() > 0)
+                                @foreach ($actualCartItems as $item)
                                     <div class="product">
                                         <div class="product-cart-details">
                                             <h4 class="product-title">
-                                                <a href="product.php?id={{ $item['product_id'] }}">
-                                                    {{ htmlspecialchars($item['product_name']) }}
+                                                <a href="product.php?id={{ $item->product->id }}">
+                                                    {{ htmlspecialchars($item->product->product_name ?? 'N/A') }}
                                                 </a>
                                             </h4>
                                             <span class="cart-product-info">
-                                                <span class="cart-product-qty">{{ $item['quantity'] }}</span>
-                                                x ${{ number_format($item['price'], 2) }}
+                                                <span class="cart-product-qty">{{ $item->quantity }}</span>
+                                                x ${{ number_format($item->product->price ?? 0, 2) }}
                                             </span>
                                         </div>
                                         <figure class="product-image-container">
-                                            <a href="product.php?id={{ $item['product_id'] }}" class="product-image">
-                                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCvHwovbRHB9NnFG6PaeXbFZMAczyZ6m9EHQ&s"
-                                                    alt="product">
+                                            <a href="product.php?id={{ $item->product->id }}" class="product-image">
+                                                {{-- Assuming the Product model stores image attachment --}}
+                                                @if (!empty($item->product->attachments[0]))
+                                                    <img src="{{ asset('storage/' . $item->product->attachments[0]) }}"
+                                                        alt="product image">
+                                                @else
+                                                    <img src="https://via.placeholder.com/60" alt="product image">
+                                                @endif
                                             </a>
                                         </figure>
-                                        {{-- Note: The `cart.php?remove=` link is kept static for navigation only --}}
-                                        <a href="cart.php?remove={{ $item['product_id'] }}" class="btn-remove"
-                                            title="Remove Product">
-                                            <i class="icon-close"></i>
-                                        </a>
+                                        {{-- ⚠️ THE REMOVAL FORM ⚠️ --}}
+                                        <form action="{{ route('cart.destroy', ['cartId' => $item->id]) }}"
+                                            method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE') {{-- Method spoofing for DELETE request --}}
+
+                                            <button type="submit" class="btn-remove" title="Remove Product"
+                                                style="border: none; background: none; cursor: pointer; padding: 0;">
+                                                <i class="icon-close"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 @endforeach
                             @else
@@ -229,11 +153,11 @@
                             @endif
                         </div>
 
-                        {{-- Cart total and action buttons (Uses Static Cart Data) --}}
-                        @if (!empty($cart_items))
+                        {{-- DYNAMIC CART TOTAL --}}
+                        @if (!empty($actualCartItems) && $actualCartItems->count() > 0)
                             <div class="dropdown-cart-total">
                                 <span>Total</span>
-                                <span class="cart-total-price">${{ number_format($cart_total, 2) }}</span>
+                                <span class="cart-total-price">${{ number_format($actualCartTotal ?? 0, 2) }}</span>
                             </div>
 
                             <div class="dropdown-cart-action">
@@ -249,14 +173,14 @@
         </div>
     </div>
 
-    {{-- Bottom Header Section --}}
+    {{-- Bottom Header Section (Categories & Clearance) --}}
     <div class="header-bottom sticky-header bg-white shadow-sm border-t border-gray-100">
         <div class="container mx-auto px-4 flex justify-between items-center h-12">
             <div class="header-left">
-                {{-- Category Dropdown (Uses Static Category Data) --}}
+                {{-- Category Dropdown (Static Categories) --}}
                 <div class="dropdown category-dropdown">
-                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false" data-display="static" title="Browse Categories">
+                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false" data-display="static" title="Browse Categories">
                         Browse Categories <i class="icon-angle-down"></i>
                     </a>
 
@@ -266,7 +190,6 @@
                                 <li class="item-lead"><a href="#">Daily offers</a></li>
                                 <li class="item-lead"><a href="#">Gift Ideas</a></li>
 
-                                {{-- Blade loop for static categories --}}
                                 @if (!empty($all_categories))
                                     @foreach ($all_categories as $category)
                                         @php $category_link = "category.html?id=" . $category['id']; @endphp
@@ -285,7 +208,7 @@
                 </div>
             </div>
 
-            {{-- Clearance Message with Tailwind classes --}}
+            {{-- Clearance Message --}}
             <div class="header-right text-sm font-medium flex items-center space-x-2">
                 <i class="la la-lightbulb-o text-yellow-500 text-lg"></i>
                 <p>Clearance<span class="highlight text-red-600 font-bold">&nbsp;Up to 30% Off</span></p>
