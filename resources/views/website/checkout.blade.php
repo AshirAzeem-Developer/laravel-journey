@@ -351,6 +351,73 @@
                 $('.individual-address-field').prop('disabled', true);
             }
 
+            function showToast(message, type = 'info') {
+                // 1. Get the HTML of the toast structure
+                // Since this is a Blade component, you can't easily grab the pre-rendered HTML.
+                // The easiest solution is to create the HTML dynamically for a simple case like this.
+
+                // First, remove any existing toast to prevent stacking issues (based on your current implementation)
+                const existingToast = document.getElementById('toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                // Determine the classes and SVG icon based on the 'type' (error in your case)
+                let bgColor = '';
+                let borderColor = '';
+                let iconSvg = '';
+
+                switch (type) {
+                    case 'success':
+                        bgColor = 'bg-green-500/90';
+                        borderColor = 'border-green-400';
+                        iconSvg =
+                            '<svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                        break;
+                    case 'error':
+                        bgColor = 'bg-rose-500/90';
+                        borderColor = 'border-rose-400';
+                        iconSvg =
+                            '<svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+                        break;
+                    case 'warning':
+                        bgColor = 'bg-yellow-500/90';
+                        borderColor = 'border-yellow-400';
+                        iconSvg =
+                            '<svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10 3h4l8 16H2L10 3z" /></svg>';
+                        break;
+                    case 'info':
+                    default:
+                        bgColor = 'bg-blue-500/90';
+                        borderColor = 'border-blue-400';
+                        iconSvg =
+                            '<svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20h.01" /></svg>';
+                        break;
+                }
+
+                // Create the toast element
+                const toastHtml = `<div id="toast"
+            class="fixed top-5 right-5 z-[9999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg border text-white backdrop-blur-lg animate-fadeIn ${bgColor} ${borderColor}">
+            ${iconSvg}
+            <span class="text-xl font-medium tracking-wide">
+                ${message}
+            </span>
+        </div>
+    `;
+
+                // 2. Append the HTML to the body
+                document.body.insertAdjacentHTML('beforeend', toastHtml);
+
+                // 3. Re-run the auto-hide script logic
+                const newToast = document.getElementById('toast');
+                if (newToast) {
+                    setTimeout(() => {
+                        newToast.classList.add('opacity-0', 'translate-x-5');
+                        setTimeout(() => newToast.remove(), 500); // Wait for transition to finish
+                    }, 3000); // Display duration
+                }
+            }
+
             $('.individual-address-field').prop('disabled', false);
             $('.address-field').on('change keyup', updateAddressStrings);
 
@@ -383,7 +450,7 @@
             paypal.Buttons({
                 createOrder: function(data, actions) {
                     if (!document.getElementById('checkout-form').checkValidity()) {
-                        alert('Please fill out all required billing and shipping fields.');
+                        showToast('Please fill out all required billing and shipping fields.', 'error');
                         document.getElementById('checkout-form').reportValidity();
                         return false;
                     }
@@ -406,11 +473,13 @@
                     });
                 },
                 onCancel: function(data) {
-                    alert('PayPal payment was cancelled.');
+                    showToast('PayPal payment was cancelled.', 'info');
                 },
                 onError: function(err) {
                     console.error("PayPal Error:", err);
-                    alert('An error occurred during the PayPal transaction. Please check the console.');
+                    showToast(
+                        'An error occurred during the PayPal transaction. Please check the console.',
+                        'error');
                 }
             }).render('#paypal-button-container');
 
