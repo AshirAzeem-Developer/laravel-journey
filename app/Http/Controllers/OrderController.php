@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\OrderItem; // Assuming you have an OrderItem model
@@ -13,6 +14,7 @@ use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -215,6 +217,8 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Send email
+            Mail::to($order->user->email)->send(new OrderPlacedMail($order));
             // 6. Success Response
             return view('website.orderConfirmation', [
                 'orderNumber' => $order->order_number,
