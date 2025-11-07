@@ -59,7 +59,7 @@
 
     async function fetchAndOpenEditModal(id) {
         try {
-            const res = await fetch(`{{ url('dashboard/users') }}/${id}`);
+            const res = await fetch(`{{ url('admin_dashboard/users') }}/${id}`);
             const data = await res.json();
             if (!data.success) throw new Error();
 
@@ -115,7 +115,7 @@
         if (action === 'add') {
             url = "{{ route('users.store') }}";
         } else if (action === 'edit' && currentUserId) {
-            url = `{{ url('dashboard/users') }}/${currentUserId}`;
+            url = `{{ url('admin_dashboard/users') }}/${currentUserId}`;
             // FIX: Change spoofed method from 'POST' to 'PATCH' for updates
             formData.append('_method', 'PATCH');
         } else {
