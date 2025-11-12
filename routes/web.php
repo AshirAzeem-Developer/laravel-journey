@@ -29,11 +29,29 @@ Route::middleware(['auth'])->prefix('cart')->group(function () {
     Route::delete('/{cartId}', [CartController::class, 'destroy'])->name('cart.destroy'); // DELETE /api/cart/{id}
 });
 
+// ---------------- >> Checkout Routes << ----------------
+Route::middleware(['auth'])->prefix('checkout')->group(function () {
+    // 1. GET route to show the checkout form (Logic moved to WebsiteController)
+    Route::get('/', [WebsiteController::class, 'checkout'])->name('checkout');
+
+    // 2. POST route for Cash on Delivery submission
+    Route::post('/', [OrderController::class, 'store'])->name('checkout.store');
+
+    // 3. POST route for PayPal AJAX server-side final processing
+    Route::post('/paypal/store', [OrderController::class, 'storePayPal'])->name('checkout.paypal.store');
+});
+
 
 // ---------------- >> Order Routes << ----------------
 Route::middleware(['auth'])->prefix('orders')->group(function () {
+    // Route to view the user's order history
     Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+
+    // Alias for order history (kept for compatibility)
     Route::get('/orderConfirmation', [OrderController::class, 'index'])->name('orders.orderConfirmation');
+
+    // 4. Dedicated confirmation route (Used for redirecting after successful order creation/payment)
+    Route::get('/confirmation', [OrderController::class, 'showConfirmation'])->name('orders.confirmation');
 });
 
 Route::middleware(['auth'])->prefix('checkout')->group(function () {

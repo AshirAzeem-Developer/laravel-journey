@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\Cart;
-use App\Models\OrderItem; // Assuming you have an OrderItem model
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,12 +19,8 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of orders for the authenticated user.
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function index()
+
+    public function index(): View
     {
         $orders = Order::where('user_id', Auth::id())
             ->with('items')
@@ -34,210 +30,254 @@ class OrderController extends Controller
         return view('website.orderConfirmation', compact('orders'));
     }
 
-    /**
-     * Display the specified order details.
-     * Uses Route Model Binding to ensure the order exists.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Contracts\View\View|RedirectResponse
-     */
-    public function show(Order $order)
+    public function show(Order $order): RedirectResponse|View
     {
-        // Policy or manual check to ensure the user owns this order
         if ($order->user_id !== Auth::id()) {
             return redirect()->route('orders.index')->with('error', 'Unauthorized access to order details.');
         }
 
-        // Eager load the order items and the product related to each item
         $order->load(['items.product']);
-
         return view('website.index', compact('order'));
     }
 
-    /**
-     * Handles the checkout process: converting cart items into a permanent order.
-     * This method must be protected by a database transaction.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return RedirectResponse
-     */
-    // public function store(Request $request): RedirectResponse | JsonResponse
-    // {
-    //     // dd($request->all());
-    //     // die();
-    //     $userId = Auth::id();
+    public function store(Request $request): RedirectResponse | View
+    {
+        try {
+            $request->validate([
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'address1' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'postcode' => 'required|string|max:50',
+                'phone_number' => 'required|string|max:50',
+                'country' => 'required|string|max:255',
+                'shipping_address' => 'required|string|max:1000',
+                'billing_address' => 'required|string|max:1000',
+                'total_amount' => 'required|numeric|min:0',
+                'shipping_cost_amount' => 'required|numeric|min:0',
+                'order_notes' => 'nullable|string|max:500'
+            ]);
+        } catch (ValidationException $e) {
+            return back()->withInput()->withErrors($e->errors())
+                ->with('order_error', 'Please correct the highlighted fields and try again.');
+        }
 
-    //     // 1. Validation for Checkout Data
-    //     $request->validate([
-    //         'shipping_address' => 'required|string|max:255',
-    //         'billing_address'  => 'required|string|max:255',
-    //         'payment_method'   => 'required|string|in:cash_on_delivery,credit_card,paypal', // Example methods
-    //         // Add validation for potential shipping costs here if they were dynamic
-    //     ]);
+        $request->merge(['payment_method' => 'cash_on_delivery']);
+        return $this->processOrderCreation($request, 'pending');
+    }
 
-    //     // 2. Fetch User's Cart Data
-    //     $cartItems = Cart::where('user_id', $userId)->with('product')->get();
 
-    //     if ($cartItems->isEmpty()) {
-    //         return redirect()->route('cart.index')->with('error', 'Your cart is empty. Please add items before checking out.');
-    //     }
+    public function storePayPal(Request $request): JsonResponse
+    {
+        try {
+            // Validate all required fields
+            $validated = $request->validate([
+                'paypal_order_id' => 'required|string|max:255',
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'address1' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'postcode' => 'required|string|max:50',
+                'phone_number' => 'required|string|max:50',
+                'country' => 'required|string|max:255',
+                'shipping_address' => 'required|string|max:1000',
+                'billing_address' => 'required|string|max:1000',
+                'total_amount' => 'required|numeric|min:0',
+                'shipping_cost_amount' => 'required|numeric|min:0',
+                'order_notes' => 'nullable|string|max:500'
+            ]);
 
-    //     // Use a database transaction to ensure all or nothing is committed (critical for checkout)
-    //     try {
-    //         DB::beginTransaction();
+            Log::info('PayPal Order Request Received', [
+                'user_id' => Auth::id(),
+                'paypal_order_id' => $validated['paypal_order_id'],
+                'total_amount' => $validated['total_amount']
+            ]);
+        } catch (ValidationException $e) {
+            Log::warning('PayPal validation failed', ['errors' => $e->errors()]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Validation Failed',
+                'messages' => $e->errors()
+            ], 422);
+        }
 
-    //         // Calculate final totals and prepare OrderItems data
-    //         $totalAmount = 0;
-    //         $orderItemsData = [];
+        $request->merge(['payment_method' => 'paypal']);
 
-    //         foreach ($cartItems as $item) {
-    //             $product = $item->product;
+        try {
+            $result = $this->processOrderCreation($request, 'paid');
 
-    //             // CRITICAL: Ensure product still exists and price is set before ordering
-    //             if (!$product || $product->price <= 0) {
-    //                 DB::rollBack();
-    //                 return redirect()->route('cart.index')->with('error', "Product '{$product->product_name}' is unavailable or has an invalid price.");
-    //             }
+            // Handle cart empty scenario
+            if ($result instanceof RedirectResponse) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Your cart is empty. Please add items before checking out.'
+                ], 400);
+            }
 
-    //             $lockedPrice = $product->price; // Lock the price at the time of purchase
-    //             $subtotal = $lockedPrice * $item->quantity;
-    //             $totalAmount += $subtotal;
+            // Extract order number from the result
+            $orderNumber = null;
+            if ($result instanceof JsonResponse) {
+                $data = $result->getData(true);
+                $orderNumber = $data['orderNumber'] ?? null;
+            }
 
-    //             $orderItemsData[] = new OrderItem([
-    //                 'product_id' => $item->product_id,
-    //                 'quantity'   => $item->quantity,
-    //                 'price'      => $lockedPrice, // Price locked at order time
-    //             ]);
-    //         }
+            if (!$orderNumber) {
+                throw new Exception('Order number not generated');
+            }
 
-    //         // 3. Create the Order
-    //         $order = Order::create([
-    //             'user_id'          => $userId,
-    //             'order_number'     => 'ORD-' . time() . rand(100, 999), // Simple unique order number
-    //             'total_amount'     => $totalAmount,
-    //             'payment_status'   => 'pending', // Default status after order creation
-    //             'order_status'     => 'processing',
-    //             'shipping_address' => $request->input('shipping_address'),
-    //             'billing_address'  => $request->input('billing_address'),
-    //             'payment_method'   => $request->input('payment_method'),
-    //             'created_by'       => $userId,
-    //         ]);
+            Log::info('PayPal Order Created Successfully', [
+                'order_number' => $orderNumber,
+                'user_id' => Auth::id()
+            ]);
 
-    //         // 4. Create the Order Items
-    //         $order->items()->saveMany($orderItemsData);
+            // Return success with redirect URL
+            return response()->json([
+                'success' => true,
+                'orderNumber' => $orderNumber,
+                'redirect_url' => route('orders.confirmation', [
+                    'orderNumber' => $orderNumber,
+                    'success' => 'Order successfully placed!'
+                ])
+            ], 200);
+        } catch (Exception $e) {
+            Log::error('PayPal Order Creation Failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-    //         // 5. Clear the Cart (Only upon successful order creation)
-    //         Cart::where('user_id', $userId)->delete();
+            return response()->json([
+                'success' => false,
+                'error' => 'Checkout failed due to a system error. Please try again.',
+                'details' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
 
-    //         DB::commit();
 
-    //         // 6. Success Response
-    //         return redirect()->route('orders.show', $order)->with('success', "Order #{$order->order_number} successfully placed!");
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         // Log the error for developer debugging
-    //         Log::error("Order creation failed for user {$userId}: " . $e->getMessage());
-    //         // User-friendly error message
-    //         return response()->json([
-    //             'error' => 'Checkout failed. Please review your details and try again.',
-    //             'exception' => $e->getMessage()
-    //         ], 500);
-    //         // return back()->withInput()->with('error', 'Checkout failed. Please review your details and try again.');
-    //     }
-    // }
-
-    public function store(Request $request): JsonResponse  | RedirectResponse | View
+    private function processOrderCreation(Request $request, string $paymentStatus): View | RedirectResponse | JsonResponse
     {
         $userId = Auth::id();
 
         try {
-            // 1. Validation for Checkout Data
-            // We validate the final consolidated address strings and total amount.
-            $request->validate([
-                'shipping_address' => 'required|string|max:1000', // Matches the hidden field name
-                'billing_address'  => 'required|string|max:1000',  // Matches the hidden field name
-                'payment_method' => 'required|string|in:cash_on_delivery,paypal',
-                'total_amount'     => 'required|numeric|min:0',
-            ]);
-
-            // 2. Fetch User's Cart Data
+            // Fetch cart items
             $cartItems = Cart::where('user_id', $userId)->with('product')->get();
 
             if ($cartItems->isEmpty()) {
-                return redirect()->route('cart.index')->with('error', 'Your cart is empty. Please add items before checking out.');
+                return redirect()->route('cart.index')
+                    ->with('error', 'Your cart is empty. Please add items before checking out.');
             }
 
-            // Start Transaction
             DB::beginTransaction();
 
             $totalAmount = 0;
             $orderItemsData = [];
 
+            // Process cart items
             foreach ($cartItems as $item) {
                 $product = $item->product;
 
                 if (!$product || $product->price <= 0) {
                     DB::rollBack();
-                    return redirect()->route('cart.index')->with('error', "Product '{$product->product_name}' is unavailable or has an invalid price.");
+                    throw new Exception("Product '{$product->product_name}' is unavailable or has an invalid price.");
                 }
 
                 $lockedPrice = $product->price;
-                $subtotal = $lockedPrice * $item->quantity;
-                $totalAmount += $subtotal;
+                $totalAmount += ($lockedPrice * $item->quantity);
 
                 $orderItemsData[] = new OrderItem([
                     'product_id' => $item->product_id,
-                    'quantity'   => $item->quantity,
+                    'quantity' => $item->quantity,
                     'unit_price' => $lockedPrice,
                 ]);
             }
 
-            // 3. Create the Order
+            // Verify total amount
+            $requestedTotal = (float) $request->input('total_amount');
+            $shippingCost = (float) $request->input('shipping_cost_amount');
+            $calculatedTotal = $totalAmount + $shippingCost;
+
+            if (abs($requestedTotal - $calculatedTotal) > 0.01) {
+                DB::rollBack();
+                Log::error('Total amount mismatch', [
+                    'user_id' => $userId,
+                    'client_total' => $requestedTotal,
+                    'server_total' => $calculatedTotal
+                ]);
+                throw new Exception('Order total mismatch. Please refresh and try again.');
+            }
+
+            // Create order
             $order = Order::create([
-                'user_id'          => $userId,
-                'order_number'     => 'ORD-' . time() . rand(100, 999),
-                // Use the validated total amount from the request (safer)
-                'total_amount'     => $request->input('total_amount'),
-                'payment_status' => ($request->input('payment_method') === 'cash_on_delivery') ? 'pending' : 'paid',
-                'order_status'     => 'processing',
-
-                // 💡 CRITICAL FIX: Use the single, complete address string from the request
+                'user_id' => $userId,
+                'order_number' => 'ORD-' . time() . rand(100, 999),
+                'total_amount' => $calculatedTotal,
+                'payment_status' => $paymentStatus,
+                'order_status' => 'processing',
                 'shipping_address' => $request->input('shipping_address'),
-                'billing_address'  => $request->input('billing_address'),
-
-                'payment_method'   => $request->input('payment_method'),
-                'created_by'       => $userId,
+                'billing_address' => $request->input('billing_address'),
+                'payment_method' => $request->input('payment_method'),
+                'transaction_id' => $request->input('paypal_order_id'),
+                'created_by' => $userId,
             ]);
 
-            // 4. Create the Order Items
+            // Create order items
             $order->items()->saveMany($orderItemsData);
 
-            // 5. Clear the Cart
+            // Clear cart
             Cart::where('user_id', $userId)->delete();
 
             DB::commit();
 
-            // Send email
-            Mail::to($order->user->email)->send(new OrderPlacedMail($order));
-            // 6. Success Response
-            return view('website.orderConfirmation', [
-                'orderNumber' => $order->order_number,
-                'success' => "Order #{$order->order_number} successfully placed!"
-            ]);
+            // Send confirmation email
+            try {
+                Mail::to(Auth::user()->email)->send(new OrderPlacedMail($order));
+            } catch (Exception $e) {
+                Log::warning('Failed to send order confirmation email', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
-            // redirect()->route('orders.show', $order)->with('success', "Order #{$order->order_number} successfully placed!");
-        } catch (ValidationException $e) {
-            // Log the individual validation errors
-            Log::warning("Checkout validation failed: " . json_encode($e->errors()));
-            return back()->withInput()->withErrors($e->errors())->with('error', 'Please correct the highlighted fields and try again.');
+            // Return appropriate response based on payment method
+            if ($request->input('payment_method') === 'cash_on_delivery') {
+                return view('website.orderConfirmation', [
+                    'orderNumber' => $order->order_number,
+                    'success' => "Order #{$order->order_number} successfully placed!"
+                ]);
+            }
+
+            // For PayPal: return JSON with order number
+            return response()->json(['orderNumber' => $order->order_number], 200);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error("Order creation failed for user {$userId}: " . $e->getMessage());
-            // return back()->withInput()->with('error', 'Checkout failed due to a system error. Please try again.');
-            return response()->json([
-                'error' => 'Checkout failed due to a system error. Please try again.',
-                'exception' => $e->getMessage()
-            ], 500);
+            Log::error('Order creation failed', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            if ($request->input('payment_method') === 'cash_on_delivery') {
+                return back()->withInput()
+                    ->with('order_error', 'Checkout failed due to a system error. Please try again.');
+            }
+
+            throw $e;
         }
+    }
+
+    public function showConfirmation(Request $request): View
+    {
+        $orderNumber = $request->query('orderNumber');
+        $successMessage = $request->query('success', 'Order successfully placed!');
+
+        return view('website.orderConfirmation', [
+            'orderNumber' => $orderNumber,
+            'success' => $successMessage
+        ]);
     }
 }
