@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\WebsiteController;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Product;
@@ -18,15 +19,7 @@ use Illuminate\Support\Facades\Route;
 // ========================
 
 // ======================================== Home page (Ecommerce website) Routes =======================================
-Route::get('/', function () {
-
-    $data = [
-        'categories' => Category::all(),
-        'products' => Product::all(),
-    ];
-
-    return view('website.index', $data);
-})->name('website.home');
+Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
 
 // -------- Cart Routes --------
 Route::middleware(['auth'])->prefix('cart')->group(function () {

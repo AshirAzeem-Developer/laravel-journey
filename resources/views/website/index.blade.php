@@ -1,20 +1,27 @@
 @php
 
-    // Group products by Category ID for the carousel tabs (simulated logic)
-    $grouped_products = [];
-    foreach ($products as $product) {
-        $grouped_products[$product['category_id']][] = $product;
-    }
+    // This logic correctly uses the $categories collection passed from the controller.
 
-    // Map the HTML tab IDs to the respective product groups (simulated logic)
+    // 1. Get ALL products flat list (for the 'All' tab)
+    $all_products = $data['categories']->flatMap(function ($category) {
+        return $category->products;
+    });
+
+    // 2. Map Category IDs to their respective product collections
+    $grouped_products = $data['categories']->mapWithKeys(function ($category) {
+        return [$category->id => $category->products];
+    });
+
+    // 3. Map the HTML tab IDs to the respective product groups
+    // The keys (11, 14, etc.) MUST match the primary key 'id' of the category in your database.
     $tabs = [
-        'new-all-tab' => $products,
-        'new-computers-tab' => $grouped_products[11] ?? [],
-        'new-tv-tab' => $grouped_products[14] ?? [],
-        'new-phones-tab' => $grouped_products[13] ?? [],
-        'new-watches-tab' => $grouped_products[16] ?? [],
-        'new-cameras-tab' => $grouped_products[12] ?? [],
-        'new-audio-tab' => $grouped_products[15] ?? [],
+        'new-all-tab' => $all_products,
+        'new-computers-tab' => $grouped_products->get(11, collect()),
+        'new-tv-tab' => $grouped_products->get(14, collect()),
+        'new-phones-tab' => $grouped_products->get(13, collect()),
+        'new-watches-tab' => $grouped_products->get(16, collect()),
+        'new-cameras-tab' => $grouped_products->get(12, collect()),
+        'new-audio-tab' => $grouped_products->get(15, collect()),
     ];
 
     // Dummy helper functions
@@ -117,8 +124,8 @@
                 <div class="cat-blocks-container">
                     <div class="row">
 
-                        @if (count($categories) > 0)
-                            @foreach ($categories as $category)
+                        @if (count($data['categories']) > 0)
+                            @foreach ($data['categories'] as $category)
                                 @php
                                     $safe_category_name = $category['category_name'];
                                     // Use a modulo operation to cycle through the dummy images
@@ -161,7 +168,7 @@
                                         role="tab" aria-controls="new-all-tab" aria-selected="true">All</a>
                                 </li>
 
-                                @foreach ($categories as $category)
+                                @foreach ($data['categories'] as $category)
                                     <li class="nav-item">
                                         <a class="nav-link" id="cat-{{ $category['id'] }}-link" data-toggle="tab"
                                             href="#cat-{{ $category['id'] }}-tab" role="tab"
@@ -180,14 +187,14 @@
                             <div class="owl-carousel owl-full carousel-equal-height carousel-with-shadow"
                                 data-toggle="owl"
                                 data-owl-options='{"nav": true, "dots": true, "margin": 20, "loop": false, "responsive": {"0": {"items":2}, "480": {"items":2}, "768": {"items":3}, "992": {"items":4}, "1200": {"items":5}}}'>
-                                @foreach ($products as $product)
+                                @foreach ($data['categories']->flatMap->products as $product)
                                     @include('website.components.product-card', ['product' => $product])
                                 @endforeach
                             </div>
                         </div>
 
                         {{-- Products per Category --}}
-                        @foreach ($categories as $category)
+                        @foreach ($data['categories'] as $category)
                             <div class="tab-pane p-0 fade" id="cat-{{ $category['id'] }}-tab" role="tabpanel"
                                 aria-labelledby="cat-{{ $category['id'] }}-link">
                                 <div class="owl-carousel owl-full carousel-equal-height carousel-with-shadow"
@@ -358,7 +365,7 @@
                 <div class="tab-pane fade" id="mobile-cats-tab" role="tabpanel" aria-labelledby="mobile-cats-link">
                     <nav class="mobile-cats-nav">
                         <ul class="mobile-cats-menu">
-                            @foreach ($categories as $category)
+                            @foreach ($data['categories'] as $category)
                                 <li><a
                                         href="category.html?id={{ $category['id'] }}">{{ $category['category_name'] }}</a>
                                 </li>
