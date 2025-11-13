@@ -142,6 +142,16 @@ if (!isset($failedJobsCount)) {
                     <span class="text-sm font-medium">Products</span>
                 </a>
             </li>
+            {{-- Orders --}}
+            <li class="mb-1">
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    href="{{ route('admin.getAllOrders') }}">
+                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                        shopping_cart
+                    </span>
+                    <span class="text-sm font-medium">Orders</span>
+                </a>
+            </li>
 
             {{-- Reports Dropdown --}}
             <li class="mb-1">

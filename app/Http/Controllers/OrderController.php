@@ -23,6 +23,8 @@ use Stripe\Stripe;
 class OrderController extends Controller
 {
 
+
+
     public function index(): View
     {
         $orders = Order::where('user_id', Auth::id())
@@ -481,5 +483,19 @@ class OrderController extends Controller
                 'error' => 'Order creation failed.'
             ], 500);
         }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->order_status = $request->status;
+        $order->save();
+
+        // Optional: flash message or redirect
+        return back()->with('success', 'Order status updated successfully!');
     }
 }

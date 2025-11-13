@@ -83,4 +83,43 @@ class DashboardController extends Controller
         // Logic to show profile
         return view('auth.login');
     }
+
+
+    // function for orders page
+    public function getOrders(Request $request): View
+    {
+        $query = DB::table('tbl_orders')
+            ->leftJoin('users', 'tbl_orders.user_id', '=', 'users.id')
+            ->select('tbl_orders.*', 'users.name as user_name');
+
+        // Search by order number, transaction ID, or customer name
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('tbl_orders.order_number', 'LIKE', "%{$search}%")
+                    ->orWhere('tbl_orders.transaction_id', 'LIKE', "%{$search}%")
+                    ->orWhere('users.name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter by payment status
+        if ($request->filled('payment_status')) {
+            $query->where('tbl_orders.payment_status', $request->payment_status);
+        }
+
+        // Filter by order status
+        if ($request->filled('order_status')) {
+            $query->where('tbl_orders.order_status', $request->order_status);
+        }
+
+        $orders = $query->latest('tbl_orders.created_at')->paginate(10)->withQueryString();
+
+        return view('orders.index', [
+            'orders' => $orders,
+            'activeSection' => 'orders',
+            'search' => $request->search ?? '',
+            'payment_status' => $request->payment_status ?? '',
+            'order_status' => $request->order_status ?? '',
+        ]);
+    }
 }

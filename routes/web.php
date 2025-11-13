@@ -125,6 +125,13 @@ Route::prefix('admin_dashboard')->group(function () {
             // Route::match(['put', 'patch'], '/{product}', [ProductController::class, 'update'])->name('products.update');
             Route::delete('/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
         });
+
+        // --- Orders Routes ---
+        Route::prefix('Orders')->group(function () {
+            Route::get('/', [DashboardController::class, 'getOrders'])->name('admin.getAllOrders');
+            Route::get('/{order}', [OrderController::class, 'adminShow'])->name('admin.orders.show');
+            Route::put('/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.updateOrderStatus');
+        });
     });
 });
 
