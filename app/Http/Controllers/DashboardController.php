@@ -88,11 +88,12 @@ class DashboardController extends Controller
     // function for orders page
     public function getOrders(Request $request): View
     {
+        // Start the base query
         $query = DB::table('tbl_orders')
             ->leftJoin('users', 'tbl_orders.user_id', '=', 'users.id')
             ->select('tbl_orders.*', 'users.name as user_name');
 
-        // Search by order number, transaction ID, or customer name
+        // --- Filtering Logic ---
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -102,21 +103,37 @@ class DashboardController extends Controller
             });
         }
 
-        // Filter by payment status
         if ($request->filled('payment_status')) {
             $query->where('tbl_orders.payment_status', $request->payment_status);
         }
 
-        // Filter by order status
         if ($request->filled('order_status')) {
             $query->where('tbl_orders.order_status', $request->order_status);
         }
+        // --- End Filtering Logic ---
 
+        // 1. Get the TOTAL filtered dataset for statistics (before pagination)
+        $allFilteredOrders = (clone $query)->get();
+
+        // 2. Calculate the correct statistics
+        $totalOrdersCount = $allFilteredOrders->count();
+        $pendingOrdersCount = $allFilteredOrders->where('payment_status', 'pending')->count();
+        $deliveredOrdersCount = $allFilteredOrders->where('order_status', 'delivered')->count();
+        $totalRevenue = $allFilteredOrders->sum('total_amount');
+
+        // 3. Apply Pagination to the main query
         $orders = $query->latest('tbl_orders.created_at')->paginate(10)->withQueryString();
 
+        // 4. Pass the calculated statistics to the view
         return view('orders.index', [
             'orders' => $orders,
             'activeSection' => 'orders',
+            // Statistics variables:
+            'totalOrdersCount' => $totalOrdersCount,
+            'pendingOrdersCount' => $pendingOrdersCount,
+            'deliveredOrdersCount' => $deliveredOrdersCount,
+            'totalRevenue' => $totalRevenue,
+            // Request variables for filters/search:
             'search' => $request->search ?? '',
             'payment_status' => $request->payment_status ?? '',
             'order_status' => $request->order_status ?? '',

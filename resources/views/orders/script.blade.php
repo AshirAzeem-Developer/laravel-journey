@@ -1,10 +1,34 @@
 <script>
+    /**
+     * 🔹 Close Modal
+     * NOTE: This function is exposed globally to be called from HTML onclick attributes.
+     */
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        const backdrop = document.getElementById('modalBackdrop');
+        const body = document.body;
+
+        if (!modal) return;
+
+        // Animate out
+        modal.children[0]?.classList.replace('opacity-100', 'opacity-0');
+        modal.children[0]?.classList.replace('scale-100', 'scale-95');
+
+        // Hide after animation (200ms)
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            backdrop?.classList.add('hidden');
+            body.classList.remove('overflow-hidden');
+        }, 300); // Increased delay slightly for better transition timing
+    }
+
+
     document.addEventListener('DOMContentLoaded', () => {
         const body = document.body;
         const backdrop = document.getElementById('modalBackdrop');
 
         /**
-         * 🔹 Open Modal
+         * 🔹 Open Modal (kept local, as it's only called internally by button listeners)
          */
         function openModal(id) {
             const modal = document.getElementById(id);
@@ -20,22 +44,6 @@
             });
         }
 
-        /**
-         * 🔹 Close Modal
-         */
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (!modal) return;
-
-            modal.children[0]?.classList.replace('opacity-100', 'opacity-0');
-            modal.children[0]?.classList.replace('scale-100', 'scale-95');
-
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                backdrop?.classList.add('hidden');
-                body.classList.remove('overflow-hidden');
-            }, 200);
-        }
 
         /**
          * 🔹 Global backdrop + ESC close
@@ -56,8 +64,6 @@
 
         /**
          * 🔹 Attach all modal open buttons dynamically
-         *  Use data attributes in your buttons:
-         *  e.g. <button data-modal="view" data-id="1024">View</button>
          */
         document.querySelectorAll('[data-modal]').forEach(btn => {
             btn.addEventListener('click', e => {
@@ -67,6 +73,7 @@
 
                 switch (modalType) {
                     case 'view':
+                        // Placeholder data population
                         document.getElementById('viewContent').innerHTML = `
                         <div class="grid grid-cols-2 gap-4">
                             <div><strong>Order #:</strong> ${orderId}</div>
@@ -80,23 +87,20 @@
                         openModal('viewModal');
                         break;
 
-                    case 'edit':
-                        document.getElementById('editOrderNumber').value = orderId;
-                        document.getElementById('editTotalAmount').value = '250';
-                        document.getElementById('editPaymentStatus').value = 'paid';
-                        document.getElementById('editOrderStatus').value = 'delivered';
-                        document.getElementById('editPaymentMethod').value = 'paypal';
-                        document.getElementById('editTransactionId').value = 'TXN12345';
-                        document.getElementById('editShippingAddress').value =
-                            '123 Main Street, Karachi, Pakistan';
-                        document.getElementById('editForm').action =
-                            `/admin_dashboard/orders/${orderId}`;
-                        openModal('editModal');
-                        break;
+                        // case 'edit':
+                        //     // Removed 'edit' placeholder logic since you didn't provide the modal,
+                        //     // but left the openModal logic for 'delete'.
+                        //     // If you add an edit modal, uncomment and adjust the logic below:
+                        //     /*
+                        //     document.getElementById('editForm').action = `/admin_dashboard/orders/${orderId}`;
+                        //     openModal('editModal');
+                        //     */
+                        //     break;
 
                     case 'delete':
                         document.getElementById('deleteMessage').innerHTML =
                             `Are you sure you want to delete <strong>Order #${orderId}</strong>? This cannot be undone.`;
+                        // Assuming your route is 'admin.destroyOrder'
                         document.getElementById('deleteForm').action =
                             `/admin_dashboard/orders/${orderId}`;
                         openModal('deleteModal');
@@ -107,6 +111,7 @@
 
         /**
          * 🔹 Attach all close buttons with [data-close-modal] attribute
+         * (Though direct onclick is now the simpler path for close buttons)
          */
         document.querySelectorAll('[data-close-modal]').forEach(btn => {
             btn.addEventListener('click', e => {

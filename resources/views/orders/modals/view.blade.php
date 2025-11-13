@@ -10,7 +10,6 @@
 
         <div class="p-6 space-y-4">
             <div id="viewContent" class="space-y-3 text-gray-700 dark:text-gray-200">
-                <!-- Order Details dynamically inserted via JS -->
             </div>
         </div>
 

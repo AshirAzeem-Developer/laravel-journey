@@ -6,14 +6,23 @@
         class="py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen">
         <div class="max-w-[1600px] mx-auto space-y-6">
 
-            <!-- Statistics Cards -->
+            @php
+                // NOTE: For accurate statistics, these counts should ideally be calculated
+                // in the controller on the *full* filtered dataset, not the paginated $orders.
+                // Keeping the logic here for demonstration of the fix based on the provided data structure.
+                $pendingCount = $orders->getCollection()->where('payment_status', 'pending')->count();
+                $deliveredCount = $orders->getCollection()->where('order_status', 'delivered')->count();
+                $totalRevenue = $orders->getCollection()->sum('total_amount');
+            @endphp
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Orders</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $orders->total() }}</p>
+                            {{-- Now uses the count of all filtered orders --}}
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Orders (Filtered)</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $totalOrdersCount }}</p>
                         </div>
                         <div
                             class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
@@ -26,17 +35,10 @@
                     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
+                            {{-- Now uses the pre-calculated variable --}}
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Orders</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                                @php
-                                    $pendingCount = 0;
-                                    foreach ($orders as $order) {
-                                        if ($order->payment_status === 'pending') {
-                                            $pendingCount++;
-                                        }
-                                    }
-                                @endphp
-                                {{ $pendingCount }}
+                                {{ $pendingOrdersCount }}
                             </p>
                         </div>
                         <div
@@ -50,17 +52,10 @@
                     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+                            {{-- Now uses the pre-calculated variable --}}
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Completed Orders</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                                @php
-                                    $deliveredCount = 0;
-                                    foreach ($orders as $order) {
-                                        if ($order->order_status === 'delivered') {
-                                            $deliveredCount++;
-                                        }
-                                    }
-                                @endphp
-                                {{ $deliveredCount }}
+                                {{ $deliveredOrdersCount }}
                             </p>
                         </div>
                         <div
@@ -74,14 +69,9 @@
                     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue</p>
+                            {{-- Now uses the pre-calculated variable --}}
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue (Filtered)</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                                @php
-                                    $totalRevenue = 0;
-                                    foreach ($orders as $order) {
-                                        $totalRevenue += $order->total_amount;
-                                    }
-                                @endphp
                                 ${{ number_format($totalRevenue, 2) }}
                             </p>
                         </div>
@@ -93,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- Header Section with Enhanced Controls -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div>
@@ -104,7 +93,16 @@
 
                     <form method="GET" action="{{ route('admin.getAllOrders') }}"
                         class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- Search Input -->
+                        @if (request('search'))
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                        @endif
+                        @if (request('payment_status') && !isset($ignore_payment_status_filter))
+                            <input type="hidden" name="payment_status" value="{{ request('payment_status') }}">
+                        @endif
+                        @if (request('order_status') && !isset($ignore_order_status_filter))
+                            <input type="hidden" name="order_status" value="{{ request('order_status') }}">
+                        @endif
+
                         <div class="relative flex-1 sm:min-w-[280px]">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-gray-400"></i>
@@ -114,7 +112,6 @@
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
                         </div>
 
-                        <!-- Payment Status Filter -->
                         <select name="payment_status" onchange="this.form.submit()"
                             class="px-4 pr-8 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                             <option value="">All Payments</option>
@@ -128,7 +125,6 @@
                                 Refunded</option>
                         </select>
 
-                        <!-- Order Status Filter -->
                         <select name="order_status" onchange="this.form.submit()"
                             class="px-4 pr-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                             <option value="">All Orders</option>
@@ -140,20 +136,20 @@
                                 Shipped</option>
                             <option value="delivered" {{ request('order_status') == 'delivered' ? 'selected' : '' }}>
                                 Delivered</option>
+                            <option value="cancelled" {{ request('order_status') == 'cancelled' ? 'selected' : '' }}>
+                                Cancelled</option>
                         </select>
 
-                        <!-- Export Button -->
                         <button type="submit"
                             class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                             <i class="fas fa-search"></i>
-                            <span class="hidden sm:inline">Apply</span>
+                            <span class="hidden sm:inline">Apply Filters</span>
                         </button>
                     </form>
 
                 </div>
             </div>
 
-            <!-- Enhanced Orders Table -->
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -220,7 +216,7 @@
                                                     {{ $order->user->name ?? 'Guest User' }}
                                                 </div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                    ID: {{ $order->user_id }}
+                                                    ID: {{ $order->user_id ?? 'N/A' }}
                                                 </div>
                                             </div>
                                         </div>
@@ -238,13 +234,13 @@
                                     <td class="px-6 py-4">
                                         <span
                                             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                                            @if ($order->payment_status === 'paid') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
-                                            @elseif($order->payment_status === 'pending')
-                                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400
-                                            @elseif($order->payment_status === 'refunded')
-                                                bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
-                                            @else
-                                                bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 @endif">
+                                                @if ($order->payment_status === 'paid') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                                @elseif($order->payment_status === 'pending')
+                                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400
+                                                @elseif($order->payment_status === 'refunded')
+                                                    bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                                @else
+                                                    bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 @endif">
                                             <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                             {{ ucfirst($order->payment_status) }}
                                         </span>
@@ -253,13 +249,13 @@
                                     <td class="px-6 py-4">
                                         <span
                                             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                                            @if ($order->order_status === 'delivered') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
-                                            @elseif($order->order_status === 'shipped')
-                                                bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400
-                                            @elseif($order->order_status === 'processing')
-                                                bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400
-                                            @else
-                                                bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
+                                                @if ($order->order_status === 'delivered') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                                                @elseif($order->order_status === 'shipped')
+                                                    bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400
+                                                @elseif($order->order_status === 'processing')
+                                                    bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400
+                                                @else
+                                                    bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
                                             <i class="fas fa-circle text-[6px]"></i>
                                             {{ ucfirst($order->order_status) }}
                                         </span>
@@ -273,11 +269,14 @@
                                     </td>
 
                                     <td class="px-6 py-4 min-w-[150px]">
+                                        @php
+                                            $createdAt = \Carbon\Carbon::parse($order->created_at);
+                                        @endphp
                                         <div class="text-sm text-gray-900 dark:text-gray-100">
-                                            {{ is_string($order->created_at) ? \Carbon\Carbon::parse($order->created_at)->format('M d, Y') : $order->created_at->format('M d, Y') }}
+                                            {{ $createdAt->format('M d, Y') }}
                                         </div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ is_string($order->created_at) ? \Carbon\Carbon::parse($order->created_at)->format('h:i A') : $order->created_at->format('h:i A') }}
+                                            {{ $createdAt->format('h:i A') }}
                                         </div>
                                     </td>
 
@@ -294,14 +293,14 @@
                                                 @method('PUT')
                                                 <select name="status" onchange="this.form.submit()"
                                                     class="text-sm rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500
-                       dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 transition duration-150 ease-in-out">
+                                                        dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 transition duration-150 ease-in-out">
                                                     <option value="pending"
                                                         {{ $order->order_status == 'pending' ? 'selected' : '' }}>
                                                         Pending
                                                     </option>
                                                     <option value="processing"
-                                                        {{ $order->order_status == 'in_process' ? 'selected' : '' }}>In
-                                                        Process
+                                                        {{ $order->order_status == 'processing' ? 'selected' : '' }}>
+                                                        Processing
                                                     </option>
                                                     <option value="shipped"
                                                         {{ $order->order_status == 'shipped' ? 'selected' : '' }}>
@@ -317,8 +316,6 @@
                                                     </option>
                                                 </select>
                                             </form>
-
-
 
                                             <button title="Print Invoice"
                                                 class="p-2 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
@@ -352,13 +349,10 @@
                     </table>
                 </div>
 
-                <!-- Enhanced Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-
                     @if ($orders->hasPages())
-                        <div class="px-6 py-4  ">
-                            {{ $orders->links() }}
-                        </div>
+                        {{-- Append all existing request parameters (search, filters) to pagination links --}}
+                        {{ $orders->appends(request()->query())->links() }}
                     @endif
                 </div>
             </div>
@@ -371,7 +365,6 @@
 <style>
     /* Custom scrollbar */
     .overflow-x-auto::-webkit-scrollbar {
-
         height: 8px;
     }
 
