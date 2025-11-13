@@ -1,26 +1,15 @@
 @php
-    // --- Data passed directly from the Route/Controller ---
-    // $cartItems (Collection of App\Models\Cart with product relation)
-    // $subtotal (Calculated total from Cart items)
-
-    // --- Default/Helper Variables ---
     $error = $error ?? '';
     $session_error = Session::get('order_error');
-
-    // Defaulting shipping cost for display/initial calculation (adjust as needed)
     $shipping_cost = 10.0;
     $final_total = $subtotal + $shipping_cost;
-
-    // Helper function equivalent for formatting price in Blade
     $format_price_rs = fn($price) => number_format((float) $price, 2, '.', ',');
 
-    // Mock user data for form autofill (Replace with actual Auth::user() data if available)
     $user = Auth::user();
     $user_data = [
         'firstname' => $user->name ?? '',
-        'lastname' => '', // Assuming last name might be separate
+        'lastname' => '',
         'email' => $user->email ?? '',
-        // Use old input if validation failed, otherwise use user defaults
         'address1' => old('address1', $user->address_line_1 ?? ''),
         'address2' => old('address2', $user->address_line_2 ?? ''),
         'city' => old('city', $user->city ?? ''),
@@ -29,7 +18,6 @@
         'phone_number' => old('phone_number', $user->phone ?? ''),
     ];
 
-    // Initial full address string creation (used for hidden inputs on load)
     $full_address_string = implode(
         ', ',
         array_filter([
@@ -38,10 +26,9 @@
             $user_data['city'],
             $user_data['state'],
             $user_data['postcode'],
-            'Pakistan', // Assuming fixed country
+            'Pakistan',
         ]),
     );
-
 @endphp
 
 <!DOCTYPE html>
@@ -52,12 +39,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Kharido.pk | Checkout</title>
-    {{-- Include CSRF token for AJAX and form submissions --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('storeAssets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('storeAssets/css/style.css') }}" />
     <style>
-        /* Simple Tailwind CSS styles for the Toast, required since full Tailwind is not assumed here */
         #toast {
             transition: all 0.5s ease-in-out;
             opacity: 1;
@@ -90,6 +75,22 @@
 
         .border-rose-400 {
             border-color: #fb7185;
+        }
+
+        .bg-green-500\/90 {
+            background-color: rgba(34, 197, 94, 0.9);
+        }
+
+        .border-green-400 {
+            border-color: #4ade80;
+        }
+
+        .bg-blue-500\/90 {
+            background-color: rgba(59, 130, 246, 0.9);
+        }
+
+        .border-blue-400 {
+            border-color: #60a5fa;
         }
 
         .text-white {
@@ -170,7 +171,6 @@
             letter-spacing: 0.025em;
         }
 
-        /* Icon colors for toast (simplified) */
         #toast svg {
             stroke: white;
         }
@@ -178,16 +178,12 @@
 </head>
 
 <body>
-    {{-- Displaying session error flash message --}}
     @if ($session_error)
         <div class="alert alert-danger text-center" role="alert">
             {{ $session_error }}
             {{ Session::forget('order_error') }}
         </div>
     @endif
-
-    {{-- The include below is assumed to render the toast structure that JS populates --}}
-    {{-- @include('website.components.toast') --}}
 
     @if ($errors->any())
         <div class="alert alert-warning text-center" role="alert">
@@ -208,22 +204,20 @@
                                 <div class="col-lg-9">
                                     <h2 class="checkout-title">Billing Details</h2>
                                     <div class="row">
-                                        {{-- First Name --}}
                                         <div class="col-sm-6">
                                             <label>First Name *</label>
                                             <input type="text"
-                                                class=" text-2xl text-black form-control individual-address-field @error('firstname') is-invalid @enderror"
+                                                class="form-control individual-address-field @error('firstname') is-invalid @enderror"
                                                 name="firstname" value="{{ old('firstname', $user_data['firstname']) }}"
                                                 required />
                                             @error('firstname')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                        {{-- Last Name --}}
                                         <div class="col-sm-6">
                                             <label>Last Name *</label>
                                             <input type="text"
-                                                class="text-2xl text-black form-control individual-address-field @error('lastname') is-invalid @enderror"
+                                                class="form-control individual-address-field @error('lastname') is-invalid @enderror"
                                                 name="lastname" value="{{ old('lastname', $user_data['lastname']) }}"
                                                 required />
                                             @error('lastname')
@@ -233,51 +227,45 @@
                                     </div>
 
                                     <label>Company Name (Optional)</label>
-                                    <input type="text"
-                                        class="text-2xl text-black form-control individual-address-field" name="company"
+                                    <input type="text" class="form-control individual-address-field" name="company"
                                         value="{{ old('company') }}" />
 
                                     <label>Country *</label>
                                     <input type="text"
-                                        class="text-2xl text-black form-control individual-address-field @error('country') is-invalid @enderror"
+                                        class="form-control individual-address-field @error('country') is-invalid @enderror"
                                         name="country" value="Pakistan" required />
                                     @error('country')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
 
                                     <label>Street address *</label>
-                                    {{-- Address Line 1 --}}
                                     <input type="text"
-                                        class="text-2xl text-black form-control address-field individual-address-field @error('address1') is-invalid @enderror"
+                                        class="form-control address-field individual-address-field @error('address1') is-invalid @enderror"
                                         name="address1" placeholder="House number and Street name"
                                         value="{{ $user_data['address1'] }}" required />
                                     @error('address1')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
 
-                                    {{-- Address Line 2 --}}
                                     <label>Street address 2 (Optional)</label>
-                                    <input type="text"
-                                        class="text-2xl text-black form-control address-field individual-address-field"
+                                    <input type="text" class="form-control address-field individual-address-field"
                                         name="address2" placeholder="Appartments, suite, unit etc ..."
                                         value="{{ $user_data['address2'] }}" />
 
                                     <div class="row">
-                                        {{-- City --}}
                                         <div class="col-sm-6">
                                             <label>Town / City *</label>
                                             <input type="text"
-                                                class="text-2xl text-black form-control address-field individual-address-field @error('city') is-invalid @enderror"
+                                                class="form-control address-field individual-address-field @error('city') is-invalid @enderror"
                                                 name="city" value="{{ $user_data['city'] }}" required />
                                             @error('city')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                        {{-- State --}}
                                         <div class="col-sm-6">
                                             <label>State / County *</label>
                                             <input type="text"
-                                                class="text-2xl text-black form-control address-field individual-address-field @error('state') is-invalid @enderror"
+                                                class="form-control address-field individual-address-field @error('state') is-invalid @enderror"
                                                 name="state" value="{{ $user_data['state'] }}" required />
                                             @error('state')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -286,21 +274,19 @@
                                     </div>
 
                                     <div class="row">
-                                        {{-- Postcode --}}
                                         <div class="col-sm-6">
                                             <label>Postcode / ZIP *</label>
                                             <input type="text"
-                                                class="text-2xl text-black form-control address-field individual-address-field @error('postcode') is-invalid @enderror"
+                                                class="form-control address-field individual-address-field @error('postcode') is-invalid @enderror"
                                                 name="postcode" value="{{ $user_data['postcode'] }}" required />
                                             @error('postcode')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                        {{-- Phone --}}
                                         <div class="col-sm-6">
                                             <label>Phone *</label>
                                             <input type="tel"
-                                                class="text-2xl text-black form-control individual-address-field @error('phone_number') is-invalid @enderror"
+                                                class="form-control individual-address-field @error('phone_number') is-invalid @enderror"
                                                 name="phone_number" value="{{ $user_data['phone_number'] }}"
                                                 required />
                                             @error('phone_number')
@@ -310,12 +296,9 @@
                                     </div>
 
                                     <label>Email address *</label>
-                                    <input type="email"
-                                        class="text-2xl text-black form-control individual-address-field" name="email"
+                                    <input type="email" class="form-control individual-address-field" name="email"
                                         value="{{ $user_data['email'] }}" required readonly />
 
-
-                                    {{-- HIDDEN INPUTS (These must remain enabled and pass the final single string) --}}
                                     <input type="hidden" name="shipping_address" id="shipping_address_string_input"
                                         value="{{ $full_address_string }}">
                                     <input type="hidden" name="billing_address" id="billing_address_string_input"
@@ -328,7 +311,7 @@
                                             different address?</label>
                                     </div>
                                     <label>Order notes (optional)</label>
-                                    <textarea class="text-2xl text-black form-control" cols="30" rows="4" name="order_notes"
+                                    <textarea class="form-control" cols="30" rows="4" name="order_notes"
                                         placeholder="Notes about your order, e.g. special notes for delivery">{{ old('order_notes') }}</textarea>
                                 </div>
 
@@ -343,7 +326,6 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {{-- ⚠️ Loop through actual $cartItems data ⚠️ --}}
                                                 @forelse ($cartItems as $item)
                                                     <tr class="summary-product">
                                                         <td>
@@ -408,23 +390,55 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {{-- Stripe Option --}}
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" id="stripe_radio" name="payment_method"
+                                                            value="stripe"
+                                                            class="custom-control-input payment-method-radio" required>
+                                                        <label class="custom-control-label" for="stripe_radio">
+                                                            Credit/Debit Card (Stripe)
+                                                            <img src="{{ asset('storeAssets/images/cards.png') }}"
+                                                                alt="Cards" class="float-right"
+                                                                style="height: 20px;">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        {{-- Hidden inputs for server processing --}}
                                         <input type="hidden" name="total_amount"
                                             value="{{ number_format($final_total, 2, '.', '') }}">
                                         <input type="hidden" name="shipping_cost_amount"
                                             value="{{ number_format($shipping_cost, 2, '.', '') }}">
 
+                                        {{-- COD Button --}}
                                         <button type="submit" id="cod-submit-button"
                                             class="btn btn-outline-primary-2 btn-order btn-block">
                                             <span class="btn-text">Place Order</span>
                                             <span class="btn-hover-text">Proceed to Checkout</span>
                                         </button>
 
+                                        {{-- PayPal Container --}}
                                         <div id="paypal-button-container" style="margin-top: 15px; display: none;">
                                         </div>
 
+                                        {{-- Stripe Container --}}
+                                        <div id="stripe-card-element" style="margin-top: 15px; display: none;">
+                                            <div id="card-element"
+                                                style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                                            </div>
+                                            <div id="card-errors" role="alert"
+                                                style="color: #f43f5e; margin-top: 10px;"></div>
+                                            <button type="button" id="stripe-submit-button"
+                                                class="btn btn-outline-primary-2 btn-order btn-block"
+                                                style="margin-top: 15px;">
+                                                <span class="btn-text">Pay with Card</span>
+                                                <span class="btn-hover-text">Complete Payment</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </aside>
                             </div>
@@ -440,18 +454,45 @@
     <script src="{{ asset('storeAssets/js/jquery.min.js') }}"></script>
     <script src="{{ asset('storeAssets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('storeAssets/js/main.js') }}"></script>
-
-    {{-- PayPal SDK using Blade interpolation for the public client ID --}}
     <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID_PUBLIC') }}&currency=USD"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 
     <script>
         $(document).ready(function() {
             const FINAL_TOTAL = {{ number_format($final_total, 2, '.', '') }};
             const COD_BUTTON = $('#cod-submit-button');
             const PAYPAL_CONTAINER = $('#paypal-button-container');
+            const STRIPE_CONTAINER = $('#stripe-card-element');
+            const STRIPE_BUTTON = $('#stripe-submit-button');
             const CHECKOUT_FORM = $('#checkout-form');
 
-            // Toast Helper - Pure UI feedback (minimal JS)
+            // Initialize Stripe
+            const stripe = Stripe('{{ config('services.stripe.public') }}');
+            const elements = stripe.elements();
+            const cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#32325d',
+                        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                        '::placeholder': {
+                            color: '#aab7c4'
+                        }
+                    },
+                    invalid: {
+                        color: '#fa755a',
+                        iconColor: '#fa755a'
+                    }
+                }
+            });
+            cardElement.mount('#card-element');
+
+            cardElement.on('change', function(event) {
+                const displayError = document.getElementById('card-errors');
+                displayError.textContent = event.error ? event.error.message : '';
+            });
+
+            // Toast Helper
             function showToast(message, type = 'info') {
                 const existingToast = document.getElementById('toast');
                 if (existingToast) existingToast.remove();
@@ -477,9 +518,9 @@
 
                 document.body.insertAdjacentHTML('beforeend',
                     `<div id="toast" class="fixed top-5 right-5 z-[9999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg border text-white backdrop-blur-lg animate-fadeIn ${style.bg} ${style.border}">
-                    ${style.icon}
-                    <span class="text-xl font-medium tracking-wide">${message}</span>
-                </div>`
+                        ${style.icon}
+                        <span class="text-xl font-medium tracking-wide">${message}</span>
+                    </div>`
                 );
 
                 const toast = document.getElementById('toast');
@@ -490,7 +531,7 @@
                 }, 3000);
             }
 
-            // Address string builder - Only for UI convenience, validation happens server-side
+            // Address string builder
             function updateAddressStrings() {
                 const address = [
                     $('input[name="address1"]').val(),
@@ -505,50 +546,49 @@
                 $('#billing_address_string_input').val(address);
             }
 
-            // Initialize - All fields enabled for server validation
             $('.individual-address-field').prop('disabled', false);
             $('.address-field').on('change keyup', updateAddressStrings);
             updateAddressStrings();
 
-            // COD Form Submission - Direct server-side processing
+            // COD Form Submission
             CHECKOUT_FORM.on('submit', function(e) {
                 if ($('input[name="payment_method"]:checked').val() === 'cash_on_delivery') {
                     updateAddressStrings();
-                    return true; // Server handles everything
+                    return true;
                 }
-                e.preventDefault(); // Block form submit for PayPal
+                e.preventDefault();
                 return false;
             });
 
-            // Payment method toggle - Pure UI
+            // Payment method toggle
             $('.payment-method-radio').on('change', function() {
                 const method = $(this).val();
+                COD_BUTTON.hide();
+                PAYPAL_CONTAINER.hide();
+                STRIPE_CONTAINER.hide();
+
                 if (method === 'paypal') {
-                    COD_BUTTON.hide();
                     PAYPAL_CONTAINER.show();
+                    CHECKOUT_FORM.prop('action', '#');
+                } else if (method === 'stripe') {
+                    STRIPE_CONTAINER.show();
                     CHECKOUT_FORM.prop('action', '#');
                 } else {
                     COD_BUTTON.show();
-                    PAYPAL_CONTAINER.hide();
                     CHECKOUT_FORM.prop('action', '{{ route('checkout.store') }}');
                 }
             });
             $('.payment-method-radio:checked').trigger('change');
 
-            // PayPal Integration - Minimal client logic, maximum server validation
+            // PayPal Integration
             paypal.Buttons({
-                // Step 1: Create PayPal order (client-side only for PayPal SDK)
                 createOrder: function(data, actions) {
-                    // Basic HTML5 validation before opening PayPal popup
                     if (!CHECKOUT_FORM[0].checkValidity()) {
                         showToast('Please fill out all required fields.', 'error');
                         CHECKOUT_FORM[0].reportValidity();
                         return Promise.reject(new Error('Form validation failed'));
                     }
-
                     updateAddressStrings();
-
-                    // Create PayPal order (required by PayPal SDK)
                     return actions.order.create({
                         purchase_units: [{
                             amount: {
@@ -559,45 +599,23 @@
                         }]
                     });
                 },
-
-                // Step 2: Payment approved - Capture and send to server
                 onApprove: function(data, actions) {
-                    console.log('✅ PayPal payment approved. Order ID:', data.orderID);
-
-                    // Capture payment (required by PayPal SDK)
                     return actions.order.capture().then(function(details) {
-                        console.log('✅ Payment captured:', details.status);
                         showToast('Payment successful! Creating your order...', 'success');
-
-                        // Send everything to server for validation and order creation
                         processServerPayment(data.orderID, details);
                     });
                 },
-
-                // Step 3: Payment cancelled
                 onCancel: function(data) {
-                    console.log('❌ PayPal payment cancelled by user');
                     showToast('Payment was cancelled.', 'info');
                 },
-
-                // Step 4: PayPal SDK error
                 onError: function(err) {
-                    console.error('❌ PayPal SDK Error:', err);
+                    console.error('PayPal Error:', err);
                     showToast('PayPal error occurred. Please try again.', 'error');
                 }
             }).render('#paypal-button-container');
 
-            /**
-             * SERVER-SIDE PROCESSING
-             * This function only sends data to server - all validation,
-             * order creation, and business logic happens on the server
-             */
             function processServerPayment(paypalOrderID, details) {
-                console.log('📤 Sending order to server for processing...');
-
-                updateAddressStrings(); // Final sync
-
-                // Collect all form data
+                updateAddressStrings();
                 const formData = CHECKOUT_FORM.serializeArray();
                 formData.push({
                     name: 'paypal_order_id',
@@ -607,11 +625,9 @@
                     value: 'paypal'
                 });
 
-                // Disable button to prevent double submission
                 PAYPAL_CONTAINER.find('button').prop('disabled', true);
                 showToast('Processing your order...', 'info');
 
-                // Send to server - Server does ALL the heavy lifting
                 $.ajax({
                     url: '{{ route('checkout.paypal.store') }}',
                     method: 'POST',
@@ -620,70 +636,141 @@
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    timeout: 30000, // 30 second timeout
-
-                    // Success: Server validated everything and created order
+                    timeout: 30000,
                     success: function(response) {
-                        console.log('✅ Server response:', response);
-
                         if (response.success === true && response.redirect_url) {
                             showToast('Order placed successfully! Redirecting...', 'success');
-
-                            // Small delay for user to see success message
-                            setTimeout(function() {
-                                window.location.href = response.redirect_url;
-                            }, 1000);
+                            setTimeout(() => window.location.href = response.redirect_url, 1000);
                         } else {
-                            // Unexpected response format
-                            console.error('❌ Unexpected server response:', response);
                             showToast('Order processing error. Please contact support.', 'error');
                             PAYPAL_CONTAINER.find('button').prop('disabled', false);
                         }
                     },
-
-                    // Error: Server validation failed or system error
                     error: function(xhr, status, error) {
-                        console.error('❌ Server Error:', {
-                            status: xhr.status,
-                            statusText: status,
-                            error: error,
-                            response: xhr.responseText
-                        });
-
                         PAYPAL_CONTAINER.find('button').prop('disabled', false);
-
                         let message = 'Order processing failed. Please try again.';
-
-                        // Parse server error message
                         try {
                             const errorResponse = JSON.parse(xhr.responseText);
-
                             if (xhr.status === 422 && errorResponse.messages) {
-                                // Validation errors from server
-                                const errors = Object.values(errorResponse.messages).flat();
-                                message = 'Validation error: ' + errors.join('; ');
+                                message = 'Validation error: ' + Object.values(errorResponse.messages)
+                                    .flat().join('; ');
                             } else if (errorResponse.error) {
                                 message = errorResponse.error;
                             }
-
-                            // Log detailed error for debugging
-                            if (errorResponse.details) {
-                                console.error('Server error details:', errorResponse.details);
-                            }
-                        } catch (e) {
-                            console.error('Failed to parse error response:', e);
-                        }
-
-                        // Network/timeout errors
-                        if (xhr.status === 0) {
-                            message = 'Network error. Please check your connection.';
-                        } else if (status === 'timeout') {
-                            message = 'Request timeout. Please try again.';
-                        }
-
+                        } catch (e) {}
+                        if (xhr.status === 0) message = 'Network error. Please check your connection.';
+                        else if (status === 'timeout') message = 'Request timeout. Please try again.';
                         showToast(message, 'error');
                     }
                 });
+            }
+
+            // Stripe Payment Handler
+            STRIPE_BUTTON.on('click', async function(e) {
+                e.preventDefault();
+                if (!CHECKOUT_FORM[0].checkValidity()) {
+                    showToast('Please fill out all required fields.', 'error');
+                    CHECKOUT_FORM[0].reportValidity();
+                    return;
+                }
+
+                updateAddressStrings();
+                STRIPE_BUTTON.prop('disabled', true).text('Processing...');
+                showToast('Creating payment session...', 'info');
+
+                try {
+                    const intentResponse = await $.ajax({
+                        url: '{{ route('checkout.stripe.intent') }}',
+                        method: 'POST',
+                        data: {
+                            total_amount: FINAL_TOTAL,
+                            shipping_cost_amount: {{ number_format($shipping_cost, 2, '.', '') }}
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+
+                    if (!intentResponse.success || !intentResponse.clientSecret) {
+                        throw new Error(intentResponse.error || 'Failed to create payment session');
+                    }
+
+                    showToast('Confirming payment...', 'info');
+
+                    const {
+                        error,
+                        paymentIntent
+                    } = await stripe.confirmCardPayment(intentResponse.clientSecret, {
+                        payment_method: {
+                            card: cardElement,
+                            billing_details: {
+                                name: $('input[name="firstname"]').val() + ' ' + $(
+                                    'input[name="lastname"]').val(),
+                                email: $('input[name="email"]').val(),
+                                phone: $('input[name="phone_number"]').val(),
+                                address: {
+                                    line1: $('input[name="address1"]').val(),
+                                    city: $('input[name="city"]').val(),
+                                    state: $('input[name="state"]').val(),
+                                    postal_code: $('input[name="postcode"]').val(),
+                                    country: 'US'
+                                }
+                            }
+                        }
+                    });
+
+                    if (error) throw new Error(error.message);
+
+                    if (paymentIntent.status === 'succeeded') {
+                        showToast('Payment successful! Creating order...', 'success');
+                        await processStripeOrder(paymentIntent.id);
+                    }
+                } catch (error) {
+                    console.error('Stripe Error:', error);
+                    showToast(error.message || 'Payment failed. Please try again.', 'error');
+                    STRIPE_BUTTON.prop('disabled', false).html(
+                        '<span class="btn-text">Pay with Card</span><span class="btn-hover-text">Complete Payment</span>'
+                    );
+                }
+            });
+
+            async function processStripeOrder(paymentIntentId) {
+                const formData = CHECKOUT_FORM.serializeArray();
+                formData.push({
+                    name: 'payment_intent_id',
+                    value: paymentIntentId
+                }, {
+                    name: 'payment_method',
+                    value: 'stripe'
+                });
+
+                try {
+                    const response = await $.ajax({
+                        url: '{{ route('checkout.stripe.store') }}',
+                        method: 'POST',
+                        data: $.param(formData),
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        timeout: 30000
+                    });
+
+                    if (response.success === true && response.redirect_url) {
+                        showToast('Order placed successfully! Redirecting...', 'success');
+                        setTimeout(() => window.location.href = response.redirect_url, 1000);
+                    } else {
+                        throw new Error('Order processing error');
+                    }
+                } catch (error) {
+                    let message = 'Order creation failed. Please contact support.';
+                    if (error.responseJSON && error.responseJSON.error) {
+                        message = error.responseJSON.error;
+                    }
+                    showToast(message, 'error');
+                    STRIPE_BUTTON.prop('disabled', false).html(
+                        '<span class="btn-text">Pay with Card</span><span class="btn-hover-text">Complete Payment</span>'
+                    );
+                }
             }
         });
     </script>

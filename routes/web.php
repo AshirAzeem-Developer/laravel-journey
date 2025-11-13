@@ -39,6 +39,13 @@ Route::middleware(['auth'])->prefix('checkout')->group(function () {
 
     // 3. POST route for PayPal AJAX server-side final processing
     Route::post('/paypal/store', [OrderController::class, 'storePayPal'])->name('checkout.paypal.store');
+
+
+    // Stripe routes
+    Route::post('/stripe/intent', [OrderController::class, 'createStripeIntent'])
+        ->name('checkout.stripe.intent');
+    Route::post('/stripe/store', [OrderController::class, 'storeStripe'])
+        ->name('checkout.stripe.store');
 });
 
 
