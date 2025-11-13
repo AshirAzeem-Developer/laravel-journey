@@ -93,11 +93,8 @@ Route::middleware(['auth'])->prefix('checkout')->group(function () {
 // ========================
 Route::prefix('admin_dashboard')->group(function () {
     Route::get('/login', [DashboardController::class, 'show'])->name('adminLogin');
-
     // Route for Registering Admin User
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('adminRegister');
-
-
 
     // Protected Admin Routes
     Route::middleware(['auth', 'verified'])->group(function () {

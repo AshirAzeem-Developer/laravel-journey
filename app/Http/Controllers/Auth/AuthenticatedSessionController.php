@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -25,11 +26,20 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+
+
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->route('adminDashboard');
+        $user = Auth::user();
+
+        if (trim(strtolower($user->designation)) == 'admin') {
+            return redirect()->intended(route('adminDashboard'));
+        } else {
+            // For regular users, redirect to the home page (or standard dashboard)
+            return redirect()->intended(route('website.home'));
+        }
     }
 
     /**
@@ -53,4 +63,7 @@ class AuthenticatedSessionController extends Controller
             return redirect('/');
         }
     }
+    /**
+     * Handle the user being authenticated.
+     */
 }

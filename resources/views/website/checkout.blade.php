@@ -450,12 +450,12 @@
 
         @include('website.layouts.footer')
     </div>
-
+    <script src="https://www.paypal.com/sdk/js?client-id={{ config('services.paypal.public') }}&currency=USD"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="{{ asset('storeAssets/js/jquery.min.js') }}"></script>
     <script src="{{ asset('storeAssets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('storeAssets/js/main.js') }}"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id={{ env('PAYPAL_CLIENT_ID_PUBLIC') }}&currency=USD"></script>
-    <script src="https://js.stripe.com/v3/"></script>
+
 
     <script>
         $(document).ready(function() {
