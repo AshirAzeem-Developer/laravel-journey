@@ -47,10 +47,9 @@
                             <button
                                 class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm leading-4 font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200 shadow-sm hover:shadow">
                                 <div class="flex items-center space-x-2">
-                                    <div
-                                        class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                    </div>
+                                    <img src="{{ Auth::user()->file_path ? asset('storage/' . Auth::user()->file_path) : asset('asset/images/default-avatar.png') }}"
+                                        class="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+                                        alt="Profile">
                                     <div class="text-left hidden lg:block">
                                         <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                             {{ Auth::user()->name }}</div>
@@ -73,10 +72,9 @@
                             {{-- User Info Header --}}
                             <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex items-center space-x-3">
-                                    <div
-                                        class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                    </div>
+                                    <img src="{{ Auth::user()->file_path ? asset('storage/' . Auth::user()->file_path) : asset('asset/images/default-avatar.png') }}"
+                                        class="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+                                        alt="Profile">
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900 dark:text-black">
                                             {{ Auth::user()->name }}</div>
@@ -193,7 +191,8 @@
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="#" class="flex items-center">
-                    <span class="material-symbols-rounded text-gray-500 dark:text-gray-400 text-xl mr-3">settings</span>
+                    <span
+                        class="material-symbols-rounded text-gray-500 dark:text-gray-400 text-xl mr-3">settings</span>
                     {{ __('Settings') }}
                 </x-responsive-nav-link>
 
