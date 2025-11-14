@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderPlacedMail;
+use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\OrderItem;
@@ -485,17 +486,51 @@ class OrderController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, Order $order)
     {
+        // 1. Validation (Place this at the start for immediate error handling)
         $request->validate([
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
         ]);
 
-        $order = Order::findOrFail($id);
-        $order->order_status = $request->status;
+        // 2. Get new status and check against old status
+        $newStatus = $request->input('status');
+        $oldStatus = $order->order_status;
+
+        $user = DB::table('users')->where('id', $order->user_id)->first();
+        // Check if the status has actually changed
+        if ($oldStatus === $newStatus) {
+            return redirect()->back()->with('info', "Order #{$order->order_number} status is already set to {$newStatus}.");
+        }
+
+        // 3. Update the order status in the database
+        $order->order_status = $newStatus;
         $order->save();
 
-        // Optional: flash message or redirect
-        return back()->with('success', 'Order status updated successfully!');
+
+        // 4. Send the status update email
+        try {
+            // Ensure the user exists and has an email before sending
+            // Note: Route Model Binding ensures the $order is valid.
+            if ($order->user_id && $user->email) {
+
+                // Pass the updated order instance to the Mailable
+                Mail::to($user->email)->send(new OrderStatusMail($order));
+                $emailMessage = ' and a status update email was sent.';
+            } else {
+                $emailMessage = ' but the user has no associated email.';
+            }
+        } catch (Exception $e) {
+            dd($e->getMessage());
+            die();
+            Log::error('Failed to send order status update email', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            $emailMessage = ' but the status update email failed to send.';
+        }
+
+        // 5. Success redirect
+        return redirect()->back()->with('success', "Order #{$order->order_number} status successfully updated to " . ucfirst($newStatus) . $emailMessage);
     }
 }

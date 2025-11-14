@@ -143,9 +143,6 @@ class DashboardController extends Controller
     }
     public function getOrderDetails(Order $order): JsonResponse
     {
-
-
-
         return response()->json($order);
     }
 }

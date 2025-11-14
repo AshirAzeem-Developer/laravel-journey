@@ -75,6 +75,7 @@ class Order extends Model
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
+
     /**
      * Accessors - Get human-readable values
      */
