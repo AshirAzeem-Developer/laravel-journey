@@ -521,8 +521,6 @@ class OrderController extends Controller
                 $emailMessage = ' but the user has no associated email.';
             }
         } catch (Exception $e) {
-            dd($e->getMessage());
-            die();
             Log::error('Failed to send order status update email', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage()
