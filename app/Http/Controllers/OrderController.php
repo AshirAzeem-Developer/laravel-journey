@@ -490,45 +490,68 @@ class OrderController extends Controller
     {
         // 1. Validation (Place this at the start for immediate error handling)
         $request->validate([
+            // Note: The 'in' rule effectively validates the status values.
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
         ]);
 
-        // 2. Get new status and check against old status
+        // 2. Get new status and old status
         $newStatus = $request->input('status');
         $oldStatus = $order->order_status;
 
-        $user = DB::table('users')->where('id', $order->user_id)->first();
-        // Check if the status has actually changed
+        // A. Check if the status has actually changed (Improved Flow)
         if ($oldStatus === $newStatus) {
             return redirect()->back()->with('info', "Order #{$order->order_number} status is already set to {$newStatus}.");
+        }
+
+        // B. Define Allowed Status Flow
+        $allowedTransitions = [
+            'pending'    => ['processing', 'cancelled'],
+            'processing' => ['shipped', 'cancelled'],
+            'shipped'    => ['delivered', 'cancelled'],
+            // Delivered and Cancelled are final states, allowing no further transitions.
+            'delivered'  => [],
+            'cancelled'  => [],
+        ];
+
+        if (!isset($allowedTransitions[$oldStatus]) || !in_array($newStatus, $allowedTransitions[$oldStatus])) {
+            return redirect()->back()->with(
+                'error',
+                "Order #{$order->order_number} status cannot transition from '{$oldStatus}' to '{$newStatus}'."
+            );
         }
 
         // 3. Update the order status in the database
         $order->order_status = $newStatus;
         $order->save();
 
+        // 4. Determine User and Send the status update email (Using Eloquent Relationship)
+        // Assuming a 'user' relationship exists on the Order model: $order->belongsTo(User::class);
+        $user = $order->user;
+        $emailMessage = ''; // Initialize the message part
 
-        // 4. Send the status update email
-        try {
-            // Ensure the user exists and has an email before sending
-            // Note: Route Model Binding ensures the $order is valid.
-            if ($order->user_id && $user->email) {
-
+        // Ensure the user exists and has an email before attempting to send
+        if ($user && $user->email) {
+            try {
                 // Pass the updated order instance to the Mailable
                 Mail::to($user->email)->send(new OrderStatusMail($order));
                 $emailMessage = ' and a status update email was sent.';
-            } else {
-                $emailMessage = ' but the user has no associated email.';
+            } catch (Exception $e) {
+                Log::error('Failed to send order status update email', [
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage()
+                ]);
+                $emailMessage = ' but the status update email failed to send.';
             }
-        } catch (Exception $e) {
-            Log::error('Failed to send order status update email', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage()
-            ]);
-            $emailMessage = ' but the status update email failed to send.';
+        } else {
+            // This covers cases where $user is null OR $user->email is empty/null
+            $emailMessage = ' but the user has no associated email or account.';
         }
 
         // 5. Success redirect
-        return redirect()->back()->with('success', "Order #{$order->order_number} status successfully updated to " . ucfirst($newStatus) . $emailMessage);
+        return redirect()->back()->with(
+            'success',
+            "Order #{$order->order_number} status successfully updated to **" . ucfirst($newStatus) . "**" . $emailMessage
+        );
     }
 }
