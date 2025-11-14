@@ -121,7 +121,7 @@ if (!isset($failedJobsCount)) {
             </li>
 
             {{-- Upload --}}
-            <li class="mb-1">
+            {{-- <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     href="#">
                     <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
@@ -129,7 +129,7 @@ if (!isset($failedJobsCount)) {
                     </span>
                     <span class="text-sm font-medium">Upload</span>
                 </a>
-            </li>
+            </li> --}}
 
             {{-- Products --}}
             <li class="mb-1">
