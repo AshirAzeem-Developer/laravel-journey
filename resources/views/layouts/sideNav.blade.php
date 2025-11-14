@@ -153,6 +153,18 @@ if (!isset($failedJobsCount)) {
                 </a>
             </li>
 
+            {{-- Categories --}}
+
+            <li class="mb-1">
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    href="{{ route('admin.getAllCategories') }}">
+                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                        category
+                    </span>
+                    <span class="text-sm font-medium">Categories</span>
+                </a>
+            </li>
+
             {{-- Reports Dropdown --}}
             <li class="mb-1">
                 <button
@@ -218,7 +230,7 @@ if (!isset($failedJobsCount)) {
             {{-- Profile --}}
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-                    href="#">
+                    href="{{ route('profile.edit') }}">
                     <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
                         person
                     </span>
@@ -226,27 +238,30 @@ if (!isset($failedJobsCount)) {
                 </a>
             </li>
 
-            {{-- Sign In --}}
-            <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-                    href="#">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
-                        login
-                    </span>
-                    <span class="text-sm font-medium">Sign In</span>
-                </a>
-            </li>
 
-            {{-- Sign Up --}}
-            <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-                    href="#">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
-                        assignment
-                    </span>
-                    <span class="text-sm font-medium">Sign Up</span>
-                </a>
-            </li>
+            @guest
+                {{-- Sign In --}}
+                <li class="mb-1">
+                    <a class="flex items-center py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                        href="#">
+                        <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                            login
+                        </span>
+                        <span class="text-sm font-medium">Sign In</span>
+                    </a>
+                </li>
+
+                {{-- Sign Up --}}
+                <li class="mb-1">
+                    <a class="flex items-center py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+                        href="#">
+                        <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                            assignment
+                        </span>
+                        <span class="text-sm font-medium">Sign Up</span>
+                    </a>
+                </li>
+            @endauth
 
         </ul>
     </div>

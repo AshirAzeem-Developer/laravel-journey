@@ -145,4 +145,14 @@ class DashboardController extends Controller
     {
         return response()->json($order);
     }
+
+
+    public function getCategories(): View
+    {
+        $categories = DB::table('tbl_categories')->paginate(10);
+
+        return view('categories.index', [
+            'categories' => $categories,
+        ]);
+    }
 }

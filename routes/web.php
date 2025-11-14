@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -131,6 +132,14 @@ Route::prefix('admin_dashboard')->group(function () {
             Route::get('/', [DashboardController::class, 'getOrders'])->name('admin.getAllOrders');
             Route::get('/{order}', [DashboardController::class, 'getOrderDetails'])->name('admin.getAdminOrderDetails');
             Route::put('/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.updateOrderStatus');
+        });
+
+        // --- Categories Routes ---
+        Route::prefix('Categories')->group(function () {
+            Route::get('/', [CategoryController::class, 'index'])->name('admin.getAllCategories');
+            Route::post('/', [CategoryController::class, 'store'])->name('admin.storeCategory');
+            Route::put('/{category}', [CategoryController::class, 'update'])->name('admin.updateCategory');
+            Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('admin.deleteCategory');
         });
     });
 });
