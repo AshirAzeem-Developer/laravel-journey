@@ -194,7 +194,7 @@
 
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             @forelse ($orders as $order)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors h-[120px]">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div>
@@ -321,11 +321,11 @@
                                                 class="p-2 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all">
                                                 <i class="fas fa-print text-sm"></i>
                                             </button>
-                                            <button title="Delete Order" data-modal="delete"
+                                            {{-- <button title="Delete Order" data-modal="delete"
                                                 data-id="{{ $order->id }}"
                                                 class="p-2 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
                                                 <i class="fas fa-trash-alt text-sm"></i>
-                                            </button>
+                                            </button> --}}
                                         </div>
                                     </td>
                                 </tr>
