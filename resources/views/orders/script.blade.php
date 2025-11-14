@@ -1,7 +1,6 @@
 <script>
     /**
-     * 🔹 Close Modal
-     * NOTE: This function is exposed globally to be called from HTML onclick attributes.
+     * 🔹 Close Modal (Exposed globally for HTML onclick)
      */
     function closeModal(id) {
         const modal = document.getElementById(id);
@@ -14,21 +13,21 @@
         modal.children[0]?.classList.replace('opacity-100', 'opacity-0');
         modal.children[0]?.classList.replace('scale-100', 'scale-95');
 
-        // Hide after animation (200ms)
+        // Hide after animation (300ms)
         setTimeout(() => {
             modal.classList.add('hidden');
             backdrop?.classList.add('hidden');
             body.classList.remove('overflow-hidden');
-        }, 300); // Increased delay slightly for better transition timing
+        }, 300);
     }
-
 
     document.addEventListener('DOMContentLoaded', () => {
         const body = document.body;
         const backdrop = document.getElementById('modalBackdrop');
+        const viewContent = document.getElementById('viewContent');
 
         /**
-         * 🔹 Open Modal (kept local, as it's only called internally by button listeners)
+         * 🔹 Open Modal (Local function)
          */
         function openModal(id) {
             const modal = document.getElementById(id);
@@ -43,7 +42,6 @@
                 modal.children[0]?.classList.replace('opacity-0', 'opacity-100');
             });
         }
-
 
         /**
          * 🔹 Global backdrop + ESC close
@@ -63,58 +61,103 @@
         });
 
         /**
-         * 🔹 Attach all modal open buttons dynamically
+         * 🔹 Fetch Order Details and Build View Modal Content
          */
         document.querySelectorAll('[data-modal]').forEach(btn => {
-            btn.addEventListener('click', e => {
+            btn.addEventListener('click', async (e) => {
                 e.preventDefault();
-                const modalType = btn.dataset.modal; // view | edit | delete
+                const modalType = btn.dataset.modal; // view | delete
                 const orderId = btn.dataset.id;
 
-                switch (modalType) {
-                    case 'view':
-                        // Placeholder data population
-                        document.getElementById('viewContent').innerHTML = `
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><strong>Order #:</strong> ${orderId}</div>
-                            <div><strong>Status:</strong> <span class="text-green-600">Delivered</span></div>
-                            <div><strong>Amount:</strong> $250.00</div>
-                            <div><strong>Payment:</strong> Paid via PayPal</div>
-                            <div><strong>Customer:</strong> John Doe</div>
-                            <div><strong>Date:</strong> Nov 12, 2025 - 02:15 PM</div>
-                            <div class="col-span-2"><strong>Address:</strong> 123 Main Street, Karachi, Pakistan</div>
-                        </div>`;
-                        openModal('viewModal');
-                        break;
+                if (modalType === 'delete') {
+                    // --- DELETE Logic ---
+                    document.getElementById('deleteMessage').innerHTML =
+                        `Are you sure you want to delete <strong>Order #${orderId}</strong>? This cannot be undone.`;
+                    // NOTE: Adjust route if your naming convention is different
+                    document.getElementById('deleteForm').action =
+                        `/admin_dashboard/orders/${orderId}`;
+                    openModal('deleteModal');
+                    return;
+                }
 
-                        // case 'edit':
-                        //     // Removed 'edit' placeholder logic since you didn't provide the modal,
-                        //     // but left the openModal logic for 'delete'.
-                        //     // If you add an edit modal, uncomment and adjust the logic below:
-                        //     /*
-                        //     document.getElementById('editForm').action = `/admin_dashboard/orders/${orderId}`;
-                        //     openModal('editModal');
-                        //     */
-                        //     break;
+                if (modalType === 'view') {
+                    // --- VIEW Logic: Show loading state ---
+                    viewContent.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-spinner fa-spin text-indigo-500 text-2xl"></i>
+                            <p class="text-sm mt-2">Loading order details...</p>
+                        </div>
+                    `;
+                    openModal('viewModal');
 
-                    case 'delete':
-                        document.getElementById('deleteMessage').innerHTML =
-                            `Are you sure you want to delete <strong>Order #${orderId}</strong>? This cannot be undone.`;
-                        // Assuming your route is 'admin.destroyOrder'
-                        document.getElementById('deleteForm').action =
-                            `/admin_dashboard/orders/${orderId}`;
-                        openModal('deleteModal');
-                        break;
+                    try {
+                        // 1. AJAX call to fetch actual order data
+                        // NOTE: You must have a backend route configured for this URL
+                        const response = await fetch(`Orders/${orderId}`, {
+                            headers: {
+
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch order details.');
+                        }
+                        const order = await response.json();
+
+                        // Format Date
+                        const createdAt = new Date(order.created_at);
+                        const dateString = createdAt.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        const timeString = createdAt.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+
+                        // 2. Build dynamic HTML content with actual data
+                        viewContent.innerHTML = `
+                            <h4 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4 text-indigo-600 dark:text-indigo-400">Order Information</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><strong>Order #:</strong> ${order.order_number}</div>
+                                <div><strong>Amount:</strong> $${(order.total_amount)}</div>
+                                <div><strong>Date:</strong> ${dateString} - ${timeString}</div>
+                                <div><strong>Customer:</strong> ${order.user_name || 'Guest User'} (ID: ${order.user_id || 'N/A'})</div>
+                            </div>
+
+                            <h4 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4 mt-6 text-indigo-600 dark:text-indigo-400">Status & Payment</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><strong>Payment Status:</strong> <span class="capitalize font-semibold text-green-600">${order.payment_status}</span></div>
+                                <div><strong>Order Status:</strong> <span class="capitalize font-semibold text-blue-600">${order.order_status}</span></div>
+                                <div><strong>Transaction ID:</strong> ${order.transaction_id || 'N/A'}</div>
+                                <div><strong>Payment Method:</strong> ${order.payment_method}</div>
+                            </div>
+
+                            <h4 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4 mt-6 text-indigo-600 dark:text-indigo-400">Shipping Details</h4>
+                            <div class="col-span-2">
+                                <p class="text-sm">${order.shipping_address}</p>
+                            </div>
+                        `;
+
+                    } catch (error) {
+                        console.error('Error fetching order details:', error);
+                        viewContent.innerHTML = `
+                            <div class="text-center py-8 text-red-600 dark:text-red-400">
+                                <i class="fas fa-exclamation-triangle text-2xl"></i>
+                                <p class="text-sm mt-2">Could not load order details. Please try again.</p>
+                            </div>
+                        `;
+                    }
                 }
             });
         });
 
-        /**
-         * 🔹 Attach all close buttons with [data-close-modal] attribute
-         * (Though direct onclick is now the simpler path for close buttons)
-         */
+        // Event listener for data-close-modal buttons (optional, as onclick is now global)
         document.querySelectorAll('[data-close-modal]').forEach(btn => {
-            btn.addEventListener('click', e => {
+            btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const target = btn.dataset.closeModal;
                 if (target) closeModal(target);

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -138,5 +140,12 @@ class DashboardController extends Controller
             'payment_status' => $request->payment_status ?? '',
             'order_status' => $request->order_status ?? '',
         ]);
+    }
+    public function getOrderDetails(Order $order): JsonResponse
+    {
+
+
+
+        return response()->json($order);
     }
 }

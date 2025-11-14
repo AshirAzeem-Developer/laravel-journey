@@ -129,7 +129,7 @@ Route::prefix('admin_dashboard')->group(function () {
         // --- Orders Routes ---
         Route::prefix('Orders')->group(function () {
             Route::get('/', [DashboardController::class, 'getOrders'])->name('admin.getAllOrders');
-            Route::get('/{order}', [OrderController::class, 'adminShow'])->name('admin.orders.show');
+            Route::get('/{order}', [DashboardController::class, 'getOrderDetails'])->name('admin.getAdminOrderDetails');
             Route::put('/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.updateOrderStatus');
         });
     });
