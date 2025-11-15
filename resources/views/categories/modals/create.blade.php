@@ -18,7 +18,8 @@
             <h2 class="text-2xl font-bold text-white">Add New Category</h2>
         </div>
 
-        <form action="{{ route('admin.storeCategory') }}" method="POST" class="relative z-10">
+        <form action="{{ route('admin.storeCategory') }}" method="POST" class="relative z-10"
+            enctype="multipart/form-data">
             @csrf
             <div class="space-y-5">
                 {{-- Category Name --}}
@@ -51,7 +52,27 @@
                         placeholder="Enter category description (optional)"></textarea>
                     <x-input-error :messages="$errors->get('description')" class="mt-2 text-sm text-red-400" />
                 </div>
+                {{-- NEW: Category Image Upload --}}
+                <div class="group">
+                    <label class=" text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        Category Image (Optional)
+                    </label>
+                    <input type="file" name="category_image"
+                        class="w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-purple-500/10 file:text-purple-400
+                hover:file:bg-purple-500/20" />
+                    <x-input-error :messages="$errors->get('category_image')" class="mt-2 text-sm text-red-400" />
+                </div>
             </div>
+
 
             {{-- Buttons --}}
             <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-[#2d3b4e]/50">

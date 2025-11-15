@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; // Kept for demonstration of products_count
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -32,18 +33,24 @@ class CategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'category_name' => 'required|string|max:255|unique:tbl_categories,category_name',
-            'description' => 'nullable|string|max:500',
+            'description' => 'nullable|string|max:500', // NEW: Validation for description
+            'category_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // NEW: Image validation
         ]);
 
+        $imagePath = null;
+        if ($request->hasFile('category_image')) {
+            // Store the image in the 'public/categories' directory
+            $imagePath = $request->file('category_image')->store('categories', 'public');
+        }
+
         Category::create([
-            'category_name' => $request->category_name,
-            'description' => $request->description,
-            // Assuming you want to set created_at and updated_at manually since timestamps=false
+            'category_name' => $validated['category_name'],
+            'description' => $validated['description'] ?? null,
+            'category_image' => $imagePath, // Save the path
             'created_at' => now(),
             'updated_at' => now(),
-            // 'created_by' and 'updated_by' are placeholders, assume current user ID if applicable
             'created_by' => Auth::id() ?? 'system',
             'updated_by' => Auth::id() ?? 'system',
         ]);
@@ -57,18 +64,37 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category): RedirectResponse
     {
-        $request->validate([
-            // Ignore the current category's name when checking for uniqueness
+        $validated = $request->validate([
             'category_name' => 'required|string|max:255|unique:tbl_categories,category_name,' . $category->id,
-            'description' => 'nullable|string|max:500',
+            'description' => 'nullable|string|max:500', // NEW
+            'category_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // NEW
+            'remove_image' => 'nullable|boolean', // NEW: To handle image deletion
         ]);
 
-        $category->update([
-            'category_name' => $request->category_name,
-            'description' => $request->description,
+        $data = [
+            'category_name' => $validated['category_name'],
+            'description' => $validated['description'] ?? null,
             'updated_at' => now(),
             'updated_by' => Auth::id() ?? 'system',
-        ]);
+        ];
+
+        // 1. Handle image removal
+        if ($request->boolean('remove_image') && $category->category_image) {
+            Storage::disk('public')->delete($category->category_image);
+            $data['category_image'] = null;
+        }
+
+        // 2. Handle new image upload
+        if ($request->hasFile('category_image')) {
+            // Delete old image if it exists
+            if ($category->category_image) {
+                Storage::disk('public')->delete($category->category_image);
+            }
+            // Store new image
+            $data['category_image'] = $request->file('category_image')->store('categories', 'public');
+        }
+
+        $category->update($data);
 
         return redirect()->route('admin.getAllCategories')
             ->with('success', 'Category updated successfully!');

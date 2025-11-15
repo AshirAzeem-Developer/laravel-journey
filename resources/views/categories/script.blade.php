@@ -12,6 +12,10 @@
     const categorySpinner = document.getElementById('categorySpinner');
     const categoryButtonText = document.getElementById('categoryButtonText');
     const addCategoryModal = document.getElementById('createCategoryModal');
+
+    // FIX: Added variable for the View Modal container
+    const viewCategoryModal = document.getElementById('viewCategoryModal');
+
     const editForm = document.getElementById('editCategoryForm');
     let currentCategoryId = null;
 
@@ -22,7 +26,10 @@
     const deleteCategoryIcon = document.getElementById('deleteCategoryIcon');
     const deleteCategorySpinner = document.getElementById('deleteCategorySpinner');
     const cancelDeleteCategoryBtn = document.getElementById('cancelDeleteCategoryBtn');
-    const closeDeleteCategoryModal = document.getElementById('closeDeleteCategoryModal');
+
+    // FIX: Renamed variable to avoid conflict with the function name
+    const closeDeleteCategoryModalBtn = document.getElementById('closeDeleteCategoryModal');
+
     let deleteCategoryUrl = null;
 
     // --- Toast Notification ---
@@ -82,10 +89,45 @@
         try {
             console.log("Category Selected Data -> ", category);
             currentCategoryId = category.id;
-            editForm.action = "{{ url('admin_dashboard/Categories') }}/" + currentCategoryId;
+            // Use the correct URL structure for update action (assuming 'admin_dashboard/categories' prefix)
+            editForm.action = `{{ url('admin_dashboard/Categories') }}/${category.id}`;
 
             categoryNameInput.value = category.category_name;
             categoryDescriptionInput.value = category.description || '';
+
+            // --- IMAGE MANAGEMENT LOGIC ---
+            const imageContainer = document.getElementById('image-management-container');
+            const imageUrl = category.category_image ? `/storage/${category.category_image}` : null;
+
+            imageContainer.innerHTML = `
+                <label class="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Category Image
+                </label>
+
+                ${imageUrl ? `
+                    <div class="mb-3 p-3 border border-[#2d3b4e] rounded-xl flex items-center justify-between bg-[#0f1621]">
+                        <img src="${imageUrl}" class="w-16 h-16 object-cover rounded-lg mr-4 border border-green-500/20" alt="Current Image">
+                        <span class="text-sm text-gray-400 truncate">${category.category_image.split('/').pop()}</span>
+                        <label class="flex items-center space-x-2 ml-4 cursor-pointer">
+                            <input type="checkbox" name="remove_image" value="true" class="form-checkbox h-5 w-5 text-red-500 bg-gray-800 border-gray-700 rounded focus:ring-red-500">
+                            <span class="text-xs text-red-400 font-semibold">Remove</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">Upload a new image to replace the current one, or check 'Remove'.</p>
+                ` : '<p class="text-xs text-gray-500 mb-2">No current image. Upload a new one.</p>'}
+
+                <input type="file" name="category_image"
+                    class="w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-green-500/10 file:text-green-400
+                    hover:file:bg-green-500/20"/>
+            `;
+            // --- END IMAGE MANAGEMENT LOGIC ---
 
             categoryTitle.textContent = 'Edit Category';
             categoryModal.classList.remove('hidden');
@@ -103,28 +145,51 @@
         try {
             console.log("Category Details->", category);
 
-            // Fill modal fields
+            // --- IMAGE DISPLAY LOGIC ---
+            const imageUrl = category.category_image ? `/storage/${category.category_image}` : null;
+            const imageContainer = document.getElementById('viewCategoryImageContainer');
+
+            imageContainer.innerHTML = `
+                <div class="p-4 bg-[#0f1621]/60 backdrop-blur-sm rounded-xl mb-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-2-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <label class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Category Image</label>
+                    </div>
+                    ${imageUrl
+                        ? `<img src="${imageUrl}" class="w-full h-[35vh] object-cover rounded-xl shadow-inner border border-blue-500/30" alt="${category.category_name} Image">`
+                        : `<div class="h-40 w-full flex items-center justify-center bg-[#0f1621]/80 rounded-xl border border-[#2d3b4e] text-gray-500">No Image Attached</div>`
+                    }
+                </div>
+            `;
+            // --- END IMAGE DISPLAY LOGIC ---
+
+            // Fill remaining modal fields
             document.getElementById('viewCategoryName').textContent = category.category_name;
             document.getElementById('viewCategoryDescription').textContent = category.description ||
                 'No description available';
+
             document.getElementById('viewCategoryProducts').textContent = category.products_count || 0;
 
             // Format created date if available
             if (category.created_at) {
+                // Use a comprehensive format since it's a DATETIME column
                 const date = new Date(category.created_at);
                 document.getElementById('viewCategoryCreated').textContent = date.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
             } else {
                 document.getElementById('viewCategoryCreated').textContent = 'N/A';
             }
 
             // Show modal
-            const modal = document.getElementById('viewCategoryModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            viewCategoryModal.classList.remove('hidden');
+            viewCategoryModal.classList.add('flex');
         } catch (err) {
             console.error(err);
             showToast('Unable to load category details.', 'error');
@@ -132,9 +197,8 @@
     }
 
     function closeViewCategoryModal() {
-        const modal = document.getElementById('viewCategoryModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        viewCategoryModal.classList.add('hidden');
+        viewCategoryModal.classList.remove('flex');
     }
 
     // ======================
@@ -157,7 +221,8 @@
 
     // Event Listeners for Delete Modal
     cancelDeleteCategoryBtn.addEventListener('click', closeDeleteCategoryModalHandler);
-    closeDeleteCategoryModal.addEventListener('click', closeDeleteCategoryModalHandler);
+    // FIX: Using the renamed variable
+    closeDeleteCategoryModalBtn.addEventListener('click', closeDeleteCategoryModalHandler);
 
     confirmDeleteCategoryBtn.addEventListener('click', async () => {
         if (!deleteCategoryUrl) return;
@@ -184,6 +249,11 @@
                 showToast(data.message || 'Category deleted successfully!', 'success');
                 closeDeleteCategoryModalHandler();
                 setTimeout(() => location.reload(), 1000);
+            } else if (res.status === 409) {
+                // Handles the specific conflict error from the controller (category has products)
+                showToast(data.message || 'Category has associated products and cannot be deleted.',
+                    'error');
+                closeDeleteCategoryModalHandler();
             } else {
                 showToast(data.message || 'Failed to delete category.', 'error');
             }
@@ -199,28 +269,24 @@
     });
 
     // ======================
-    // MODAL ANIMATIONS
+    // MODAL ANIMATIONS & UTILS
     // ======================
-    function toggleModal(id) {
-        const modal = document.getElementById(id);
-        if (modal) {
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
-        }
-    }
 
     // Close modals on ESC key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            if (!categoryModal.classList.contains('hidden')) closeCategoryModal();
-            if (!addCategoryModal.classList.contains('hidden')) closeAddCategoryModal();
-            if (!viewCategoryModal.classList.contains('hidden')) closeViewCategoryModal();
-            if (!deleteCategoryModal.classList.contains('hidden')) closeDeleteCategoryModalHandler();
+            // Check if modals exist before attempting to close
+            if (categoryModal && !categoryModal.classList.contains('hidden')) closeCategoryModal();
+            if (addCategoryModal && !addCategoryModal.classList.contains('hidden')) closeAddCategoryModal();
+            if (viewCategoryModal && !viewCategoryModal.classList.contains('hidden')) closeViewCategoryModal();
+            if (deleteCategoryModal && !deleteCategoryModal.classList.contains('hidden'))
+                closeDeleteCategoryModalHandler();
         }
     });
 
     // Close modals when clicking outside
-    [categoryModal, addCategoryModal, document.getElementById('viewCategoryModal'), deleteCategoryModal].forEach(
+    // FIX: Use the actual variable names defined at the top
+    [categoryModal, addCategoryModal, viewCategoryModal, deleteCategoryModal].forEach(
         modal => {
             if (modal) {
                 modal.addEventListener('click', (e) => {

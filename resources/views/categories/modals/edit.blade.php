@@ -52,6 +52,10 @@
                         class="w-full px-4 py-3 bg-[#0f1621]/80 backdrop-blur-sm border border-[#2d3b4e] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-[#3d4b5e] resize-none"
                         placeholder="Enter category description"></textarea>
                 </div>
+                {{-- NEW: Image management container. JS will populate this. --}}
+                <div id="image-management-container" class="group">
+                    {{-- Content will be dynamically inserted here by fetchAndOpenEditCategoryModal --}}
+                </div>
             </div>
 
             {{-- Buttons --}}

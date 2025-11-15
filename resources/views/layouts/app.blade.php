@@ -224,7 +224,6 @@
                 <!-- Toast Container -->
                 <div id="toast-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
             </main>
-
             <!-- Footer -->
             <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
                 <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -245,6 +244,7 @@
                 </div>
             </footer>
         </div>
+
     </div>
 
     <!-- Back to Top -->
@@ -313,18 +313,6 @@
             }, 3000);
         }
     </script>
-
-    {{-- <!-- Laravel Flash Toasts -->
-    @if (session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', () => showToast("{{ session('success') }}", 'success'));
-        </script>
-    @endif
-    @if (session('error'))
-        <script>
-            document.addEventListener('DOMContentLoaded', () => showToast("{{ session('error') }}", 'error'));
-        </script>
-    @endif --}}
 
     @stack('scripts')
 </body>
