@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WebsiteController;
 use App\Models\Cart;
@@ -140,6 +141,14 @@ Route::prefix('admin_dashboard')->group(function () {
             Route::post('/', [CategoryController::class, 'store'])->name('admin.storeCategory');
             Route::put('/{category}', [CategoryController::class, 'update'])->name('admin.updateCategory');
             Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('admin.deleteCategory');
+        });
+
+        // --- Reports Routes ---
+        Route::prefix('reports')->group(function () {
+            Route::get('/revenue-by-month', [ReportController::class, 'revenueByMonth'])->name('reports.revenueByMonth');
+            Route::get('/revenue-by-year', [ReportController::class, 'revenueByYear'])->name('reports.revenueByYear');
+            Route::get('/revenue-by-category', [ReportController::class, 'revenueByCategory'])->name('reports.revenueByCategory');
+            Route::get('/revenue-by-category-year', [ReportController::class, 'revenueByCategoryYear'])->name('reports.revenueByCategoryYear');
         });
     });
 });

@@ -6,8 +6,9 @@
 if (!isset($activeSection)) {
     if (request()->routeIs('adminDashboard')) {
         $activeSection = 'summary_stats';
+    } elseif (request()->routeIs('reports.*')) {
+        $activeSection = 'reports';
     } else {
-        // For the route named 'dashboard.section' the route parameter is 'section'
         $activeSection = request()->route('section') ?? null;
     }
 }
@@ -28,10 +29,8 @@ if (!isset($failedJobsCount)) {
 
     {{-- Sidenav Header (Logo and Brand Name) --}}
     <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
-        <a class="flex items-center justify-center  py-3 " href="{{ route('adminDashboard') }}">
+        <a class="flex items-center justify-center py-3" href="{{ route('adminDashboard') }}">
             <img src="{{ asset('asset/images/logo1.png') }}" class="w-full h-auto rounded-lg" alt="main_logo">
-            {{-- <span
-                class="ml-1 text-sm text-gray-900 dark:text-white font-bold">{{ config('app.name', 'Dashboard') }}</span> --}}
         </a>
 
         {{-- Mobile Close Button --}}
@@ -41,6 +40,7 @@ if (!isset($failedJobsCount)) {
             <span class="material-symbols-rounded">close</span>
         </button>
     </div>
+
     {{-- Scrollable Content Area --}}
     <div class="flex-1 overflow-y-auto px-4" id="sidenav-collapse-main">
         <ul class="flex flex-col space-y-1 mt-4">
@@ -120,28 +120,17 @@ if (!isset($failedJobsCount)) {
                 </h6>
             </li>
 
-            {{-- Upload --}}
-            {{-- <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    href="#">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
-                        file_upload
-                    </span>
-                    <span class="text-sm font-medium">Upload</span>
-                </a>
-            </li> --}}
-
             {{-- Products --}}
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     href="{{ route('products.index') }}">
-
                     <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
                         inventory_2
                     </span>
                     <span class="text-sm font-medium">Products</span>
                 </a>
             </li>
+
             {{-- Orders --}}
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -154,7 +143,6 @@ if (!isset($failedJobsCount)) {
             </li>
 
             {{-- Categories --}}
-
             <li class="mb-1">
                 <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     href="{{ route('admin.getAllCategories') }}">
@@ -168,16 +156,17 @@ if (!isset($failedJobsCount)) {
             {{-- Reports Dropdown --}}
             <li class="mb-1">
                 <button
-                    class="flex justify-between items-center w-full py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="flex justify-between items-center w-full py-2.5 px-3 rounded-lg transition-all duration-200 {{ isset($activeSection) && $activeSection === 'reports' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                     onclick="toggleDropdown('reports-collapse', this)" aria-expanded="false"
                     aria-controls="reports-collapse">
                     <div class="flex items-center">
-                        <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                        <span
+                            class="material-symbols-rounded mr-3 text-xl {{ isset($activeSection) && $activeSection === 'reports' ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                             bar_chart
                         </span>
                         <span class="text-sm font-medium">Reports</span>
                     </div>
-                    <svg class="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 dropdown-arrow"
+                    <svg class="h-5 w-5 {{ isset($activeSection) && $activeSection === 'reports' ? 'text-white' : 'text-gray-500 dark:text-gray-400' }} transition-transform duration-200 dropdown-arrow"
                         viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
@@ -186,33 +175,37 @@ if (!isset($failedJobsCount)) {
                 </button>
 
                 <div id="reports-collapse"
-                    class="mt-1 ml-6 space-y-1 overflow-hidden max-h-0 transition-all duration-300">
+                    class="mt-1 ml-6 space-y-1 overflow-hidden {{ isset($activeSection) && $activeSection === 'reports' ? 'max-h-96' : 'max-h-0' }} transition-all duration-300">
                     <ul class="flex flex-col ml-4 border-l-2 border-gray-200 dark:border-gray-700 pl-2">
                         <li class="mb-1">
-                            <a class="flex items-center py-2 px-3 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                                href="#">
-                                <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"></span>
+                            <a class="flex items-center py-2 px-3 rounded-lg text-sm {{ request()->routeIs('reports.revenueByMonth') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200' }} transition-colors"
+                                href="{{ route('reports.revenueByMonth') }}">
+                                <span
+                                    class="w-1.5 h-1.5 {{ request()->routeIs('reports.revenueByMonth') ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-500' }} rounded-full mr-2"></span>
                                 Revenue By Month
                             </a>
                         </li>
                         <li class="mb-1">
-                            <a class="flex items-center py-2 px-3 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                                href="#">
-                                <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"></span>
+                            <a class="flex items-center py-2 px-3 rounded-lg text-sm {{ request()->routeIs('reports.revenueByYear') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200' }} transition-colors"
+                                href="{{ route('reports.revenueByYear') }}">
+                                <span
+                                    class="w-1.5 h-1.5 {{ request()->routeIs('reports.revenueByYear') ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-500' }} rounded-full mr-2"></span>
                                 Revenue By Year
                             </a>
                         </li>
                         <li class="mb-1">
-                            <a class="flex items-center py-2 px-3 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                                href="#">
-                                <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"></span>
+                            <a class="flex items-center py-2 px-3 rounded-lg text-sm {{ request()->routeIs('reports.revenueByCategory') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200' }} transition-colors"
+                                href="{{ route('reports.revenueByCategory') }}">
+                                <span
+                                    class="w-1.5 h-1.5 {{ request()->routeIs('reports.revenueByCategory') ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-500' }} rounded-full mr-2"></span>
                                 Revenue By Category
                             </a>
                         </li>
                         <li class="mb-1">
-                            <a class="flex items-center py-2 px-3 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-                                href="#">
-                                <span class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"></span>
+                            <a class="flex items-center py-2 px-3 rounded-lg text-sm {{ request()->routeIs('reports.revenueByCategoryYear') ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200' }} transition-colors"
+                                href="{{ route('reports.revenueByCategoryYear') }}">
+                                <span
+                                    class="w-1.5 h-1.5 {{ request()->routeIs('reports.revenueByCategoryYear') ? 'bg-indigo-600' : 'bg-gray-400 dark:bg-gray-500' }} rounded-full mr-2"></span>
                                 Revenue By Category and Year
                             </a>
                         </li>
@@ -238,7 +231,6 @@ if (!isset($failedJobsCount)) {
                 </a>
             </li>
 
-
             @guest
                 {{-- Sign In --}}
                 <li class="mb-1">
@@ -261,7 +253,7 @@ if (!isset($failedJobsCount)) {
                         <span class="text-sm font-medium">Sign Up</span>
                     </a>
                 </li>
-            @endauth
+            @endguest
 
         </ul>
     </div>
@@ -334,13 +326,11 @@ if (!isset($failedJobsCount)) {
             const isOpen = !dropdown.classList.contains('max-h-0');
 
             if (isOpen) {
-                // Close dropdown
                 dropdown.classList.remove('max-h-96');
                 dropdown.classList.add('max-h-0');
                 arrow.classList.remove('rotated');
                 button.setAttribute('aria-expanded', 'false');
             } else {
-                // Open dropdown
                 dropdown.classList.remove('max-h-0');
                 dropdown.classList.add('max-h-96');
                 arrow.classList.add('rotated');
@@ -348,21 +338,17 @@ if (!isset($failedJobsCount)) {
             }
         }
 
-        // Auto-open dropdown if a child link is active
+        // Auto-open dropdown if a child link is active (on page load)
         document.addEventListener('DOMContentLoaded', function() {
-            const activeLinks = document.querySelectorAll('#reports-collapse a');
-            activeLinks.forEach(link => {
-                if (link.classList.contains('active') || window.location.href === link.href) {
-                    const dropdown = document.getElementById('reports-collapse');
-                    const button = dropdown.previousElementSibling;
-                    const arrow = button.querySelector('.dropdown-arrow');
+            const reportsCollapse = document.getElementById('reports-collapse');
 
-                    dropdown.classList.remove('max-h-0');
-                    dropdown.classList.add('max-h-96');
-                    arrow.classList.add('rotated');
-                    button.setAttribute('aria-expanded', 'true');
-                }
-            });
+            // Check if we're on a reports page
+            if (reportsCollapse && !reportsCollapse.classList.contains('max-h-0')) {
+                const button = reportsCollapse.previousElementSibling;
+                const arrow = button.querySelector('.dropdown-arrow');
+                arrow.classList.add('rotated');
+                button.setAttribute('aria-expanded', 'true');
+            }
         });
     </script>
 
