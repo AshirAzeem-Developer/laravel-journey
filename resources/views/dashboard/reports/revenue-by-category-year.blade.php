@@ -241,8 +241,6 @@
         <div class="space-y-6">
             {{-- Header with Filter --}}
             <div class="flex justify-end items-center">
-
-
                 {{-- Category Filter --}}
                 <div class="flex items-center gap-3">
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Category:</label>
@@ -476,7 +474,7 @@
             </div>
 
             {{-- Year-over-Year Growth Chart (if we have multiple years) --}}
-            @if ($years->count() > 1)
+            @if (isset($years) && $years->count() > 1)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         @if ($selectedCategoryId)
@@ -502,8 +500,10 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     @foreach ($sortedItems as $index => $data)
                                         @php
-                                            $previousData = $sortedItems->get($index - 1);
-                                            if ($previousData) {
+                                            $previousData = $index > 0 ? $sortedItems->get($index - 1) : null;
+                                            $growth = null;
+
+                                            if ($previousData && $previousData->total_revenue > 0) {
                                                 $growth =
                                                     (($data->total_revenue - $previousData->total_revenue) /
                                                         $previousData->total_revenue) *
@@ -511,7 +511,7 @@
                                                 $hasGrowth = true;
                                             }
                                         @endphp
-                                        @if (isset($growth))
+                                        @if ($growth !== null && $previousData)
                                             <div
                                                 class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
                                                 <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -530,8 +530,7 @@
                                 </div>
                                 @if (!$hasGrowth)
                                     <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">No
-                                        year-over-year
-                                        data available</p>
+                                        year-over-year data available</p>
                                 @endif
                             </div>
                         @endforeach
