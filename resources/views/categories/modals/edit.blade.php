@@ -19,7 +19,7 @@
             </h2>
         </div>
 
-        <form id="editCategoryForm" method="POST" class="relative z-10">
+        <form id="editCategoryForm" method="POST" class="relative z-10" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
