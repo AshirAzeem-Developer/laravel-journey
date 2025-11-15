@@ -54,10 +54,10 @@ if (!isset($failedJobsCount)) {
 
             {{-- Dashboard Summary --}}
             <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ !isset($activeSection) || $activeSection === 'summary_stats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ request()->routeIs('adminDashboard') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                     href="{{ route('adminDashboard') }}">
                     <span
-                        class="material-symbols-rounded mr-3 text-xl {{ !isset($activeSection) || $activeSection === 'summary_stats' ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
+                        class="material-symbols-rounded mr-3 text-xl {{ request()->routeIs('adminDashboard') ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                         dashboard
                     </span>
                     <span class="text-sm font-medium">Dashboard Summary</span>
@@ -122,9 +122,10 @@ if (!isset($failedJobsCount)) {
 
             {{-- Products --}}
             <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ request()->routeIs('products.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                     href="{{ route('products.index') }}">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                    <span
+                        class="material-symbols-rounded mr-3 text-xl {{ request()->routeIs('products.*') ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                         inventory_2
                     </span>
                     <span class="text-sm font-medium">Products</span>
@@ -133,9 +134,10 @@ if (!isset($failedJobsCount)) {
 
             {{-- Orders --}}
             <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ request()->routeIs('admin.getAllOrders') || request()->routeIs('admin.getAdminOrderDetails') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                     href="{{ route('admin.getAllOrders') }}">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                    <span
+                        class="material-symbols-rounded mr-3 text-xl {{ request()->routeIs('admin.getAllOrders') || request()->routeIs('admin.getAdminOrderDetails') ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                         shopping_cart
                     </span>
                     <span class="text-sm font-medium">Orders</span>
@@ -144,9 +146,10 @@ if (!isset($failedJobsCount)) {
 
             {{-- Categories --}}
             <li class="mb-1">
-                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                <a class="flex items-center py-2.5 px-3 rounded-lg transition-all duration-200 {{ request()->routeIs('admin.getAllCategories') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/50' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}"
                     href="{{ route('admin.getAllCategories') }}">
-                    <span class="material-symbols-rounded mr-3 text-xl text-gray-500 dark:text-gray-400">
+                    <span
+                        class="material-symbols-rounded mr-3 text-xl {{ request()->routeIs('admin.getAllCategories') ? 'text-white' : 'text-gray-500 dark:text-gray-400' }}">
                         category
                     </span>
                     <span class="text-sm font-medium">Categories</span>
