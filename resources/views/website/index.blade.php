@@ -124,13 +124,13 @@
                 <div class="cat-blocks-container">
                     <div class="row">
 
+                        {{-- {{ dd($data['categories']) }} --}}
+
                         @if (count($data['categories']) > 0)
                             @foreach ($data['categories'] as $category)
                                 @php
                                     $safe_category_name = $category['category_name'];
-                                    // Use a modulo operation to cycle through the dummy images
-                                    $image_index = ($loop->index % 8) + 1; // Cycle 1 to 8
-                                    $image_src = 'storeAssets/images/demos/demo-4/cats/' . $image_index . '.png';
+                                    $image_src = asset('storage/' . $category['category_image']);
                                     $category_link = 'category.html?id=' . $category['id'];
                                 @endphp
 

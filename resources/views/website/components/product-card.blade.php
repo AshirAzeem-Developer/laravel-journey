@@ -15,7 +15,7 @@
         {{-- ✅ FIX: Decode JSON and use first image safely --}}
         @if (!empty($attachments) && isset($attachments[0]))
             <img src="{{ asset('storage/' . $attachments[0]) }}" alt="Product Image" class="product-image"
-                style="height: 300px; object-fit: cover;">
+                style="height: 300px; object-fit: contain;">
         @else
             <img src="{{ asset('storeAssets/images/placeholder.jpg') }}" alt="No Image" class="product-image"
                 style="height: 300px; object-fit: cover;">
