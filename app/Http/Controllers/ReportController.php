@@ -28,7 +28,7 @@ class ReportController extends Controller
             ->orderBy('month')
             ->get();
 
-        // Get available years for filter
+
         $availableYears = DB::table('tbl_orders')
             ->selectRaw('DISTINCT YEAR(created_at) as year')
             ->orderBy('year', 'desc')
@@ -89,7 +89,7 @@ class ReportController extends Controller
             ->orderBy('total_revenue', 'desc')
             ->get();
 
-        // Get available years
+
         $availableYears = DB::table('tbl_orders')
             ->selectRaw('DISTINCT YEAR(created_at) as year')
             ->orderBy('year', 'desc')
@@ -110,7 +110,7 @@ class ReportController extends Controller
     {
         $categoryId = $request->get('category_id', null);
 
-        // Get all categories for filter
+
         $categories = DB::table('tbl_categories')
             ->orderBy('category_name')
             ->get();
