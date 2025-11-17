@@ -52,7 +52,7 @@
                     <h1>🎉 Order Placed!</h1>
                     {{-- Use Blade echo syntax for variables --}}
                     <p class="lead text-success">{!! $message !!}</p>
-                    <p>Your order reference number is: <strong>#{{ $orderNumber }}</strong></p>
+                    <p>Your order reference number is: <strong>#{!! $orderNumber !!}</strong></p>
                     <p>You will receive an email confirmation shortly.</p>
 
                     {{-- Use Laravel URL/Route helpers for links --}}

@@ -135,7 +135,7 @@
                                 @endphp
 
                                 <div class="col-6 col-sm-4 col-lg-2">
-                                    <a href="{{ $category_link }}" class="cat-block transition duration-300 p-5 ">
+                                    <a href="#" class="cat-block transition duration-300 p-5 ">
                                         <figure>
                                             <span>
                                                 <img src="{{ $image_src }}" alt="{{ $safe_category_name }} image">
