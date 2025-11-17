@@ -400,9 +400,9 @@
                                                             class="custom-control-input payment-method-radio" required>
                                                         <label class="custom-control-label" for="stripe_radio">
                                                             Credit/Debit Card (Stripe)
-                                                            <img src="{{ asset('storeAssets/images/cards.png') }}"
+                                                            <img src="{{ asset('storeAssets/images/cards.png.png') }}"
                                                                 alt="Cards" class="float-right"
-                                                                style="height: 20px;">
+                                                                style="height: 40px; width: 160px;">
                                                         </label>
                                                     </div>
                                                 </div>

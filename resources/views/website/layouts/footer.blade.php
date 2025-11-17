@@ -135,7 +135,7 @@
             class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
             <p class="text-xl">Copyright &copy; 2019 Kahrido.pk Store . All Rights Reserved.</p>
             <figure class="footer-payments">
-                <img src="storeAssets/images/payments.png" alt="Payment methods" class="w-full h-full">
+                <img src="{{ asset('storeAssets/images/payments.png') }}" alt="Payment methods" class="w-full h-full">
             </figure>
         </div>
     </div>

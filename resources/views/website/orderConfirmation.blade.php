@@ -51,7 +51,7 @@
                 <div class="container text-center py-5">
                     <h1>🎉 Order Placed!</h1>
                     {{-- Use Blade echo syntax for variables --}}
-                    <p class="lead text-success">{{ $message }}</p>
+                    <p class="lead text-success">{!! $message !!}</p>
                     <p>Your order reference number is: <strong>#{{ $orderNumber }}</strong></p>
                     <p>You will receive an email confirmation shortly.</p>
 
