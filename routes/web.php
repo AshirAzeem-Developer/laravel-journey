@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Route;
 // ========================
 
 // ======================================== Home page (Ecommerce website) Routes =======================================
+Route::get('/login', function () {
+    return redirect('/');
+});
 Route::get('/', [WebsiteController::class, 'home'])->name('website.home');
 
 // -------- Cart Routes --------

@@ -80,9 +80,9 @@
                                 </form>
 
                                 <div class="mt-4 text-center">
-                                    @if (Route::has('admin.register'))
+                                    @if (Route::has('adminRegister'))
                                         <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                            href="{{ route('admin.register') }}">
+                                            href="{{ route('adminRegister') }}">
                                             {{ __("Don't have an account? Register") }}
                                         </a>
                                     @endif
