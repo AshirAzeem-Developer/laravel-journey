@@ -54,6 +54,7 @@ class UsersController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => bcrypt($validated['password']),
+                'designation' => "user",
                 'file_path' => $path,
             ]);
 
