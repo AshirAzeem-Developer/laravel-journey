@@ -42,7 +42,7 @@
                                             class="text-sm font-medium text-gray-700 block mb-1" />
                                         <x-text-input id="name"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
-                                            type="text" name="name" :value="old('name')" required autofocus
+                                            type="text" name="name" :value="old('name')" autofocus
                                             autocomplete="name" />
                                         <x-input-error :messages="$errors->get('name')" class="mt-2 text-sm text-red-500" />
                                     </div>
@@ -52,8 +52,7 @@
                                             class="text-sm font-medium text-gray-700 block mb-1" />
                                         <x-text-input id="email"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
-                                            type="email" name="email" :value="old('email')" required
-                                            autocomplete="username" />
+                                            type="email" name="email" :value="old('email')" autocomplete="username" />
                                         <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-red-500" />
                                     </div>
 
@@ -62,7 +61,7 @@
                                             class="text-sm font-medium text-gray-700 block mb-1" />
                                         <x-text-input id="password"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
-                                            type="password" name="password" required autocomplete="new-password" />
+                                            type="password" name="password" autocomplete="new-password" />
                                         <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-red-500" />
                                     </div>
 
@@ -71,8 +70,7 @@
                                             class="text-sm font-medium text-gray-700 block mb-1" />
                                         <x-text-input id="password_confirmation"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-900"
-                                            type="password" name="password_confirmation" required
-                                            autocomplete="new-password" />
+                                            type="password" name="password_confirmation" autocomplete="new-password" />
                                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm text-red-500" />
                                     </div>
                                     {{-- Designation Hidden Input --}}

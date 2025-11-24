@@ -54,6 +54,8 @@
 
                                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                                     </div>
+                                    {{-- 🛑 ADD THIS HIDDEN FIELD TO THE ADMIN LOGIN FORM ONLY 🛑 --}}
+                                    <input type="hidden" name="is_admin_login" value="1">
 
                                     <!-- Remember Me -->
                                     <div class="block mt-4">

@@ -26,19 +26,48 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-
-
+        // The $request->authenticate() already runs validation and logs in the user on success
         $request->authenticate();
-
         $request->session()->regenerate();
 
         $user = Auth::user();
+        $userDesignation = trim(strtolower($user->designation));
+        $isAdminLoginAttempt = $request->has('is_admin_login'); // Checks for the hidden field
 
-        if (trim(strtolower($user->designation)) == 'admin') {
-            return redirect()->intended(route('adminDashboard'));
-        } else {
-            // For regular users, redirect to the home page (or standard dashboard)
-            return redirect()->intended(route('website.home'));
+        // 1. Logic for Admin Login Attempt (from Admin Dashboard Login form)
+        if ($isAdminLoginAttempt) {
+            if ($userDesignation == 'admin') {
+                // Success: Admin logged in via Admin Form
+                return redirect()->intended(route('adminDashboard'));
+            } else {
+                // Failure: Regular user tried to log in via Admin Form
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                // Redirect back to admin login with a custom error
+                return redirect()->back()->with([
+                    'error' => 'Access denied. You do not have administrator privileges.',
+                ]);
+            }
+        }
+
+        // 2. Logic for Website User Login Attempt (from Website Login form)
+        else {
+            if ($userDesignation == 'admin') {
+                // Failure: Admin tried to log in via Website Form
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                // Redirect back to website login with a custom error
+                return redirect()->back()->with([
+                    'error' => 'Access denied. Administrators must use the dedicated admin login portal.',
+                ]);
+            } else {
+                // Success: Regular user logged in via Website Form
+                return redirect()->intended(route('website.home'));
+            }
         }
     }
 
