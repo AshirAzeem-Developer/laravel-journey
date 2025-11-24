@@ -55,7 +55,7 @@ class DashboardController extends Controller
         switch ($section) {
             case 'users':
                 // Fetch all users
-                $data['users'] = User::all();
+                $data['users'] = User::orderBy('id', 'asc')->paginate(10);
                 $viewPartial = 'users_table';
                 break;
             case 'sessions':

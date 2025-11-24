@@ -76,6 +76,10 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="p-2 px-8">
+                {{ $contentData['users']->links() }}
+            </div>
+
 
             @if (count($contentData['users']) === 0)
                 <div class="text-center py-10 text-gray-500 dark:text-gray-400">
@@ -83,6 +87,7 @@
                 </div>
             @endif
         </div>
+
     </div>
 
     {{-- MODULAR INCLUDES --}}
