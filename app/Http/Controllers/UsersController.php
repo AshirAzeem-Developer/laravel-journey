@@ -41,8 +41,13 @@ class UsersController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/',
+                'email' => [
+                    'required',
+                    'email',
+                    'unique:users,email',
+                    'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/'
+                ],
+                'password' => 'required|min:8|max:100|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*#?&]/',
                 'file' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             ], [
                 'password.required' => 'Password is required.',
