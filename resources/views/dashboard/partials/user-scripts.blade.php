@@ -129,31 +129,48 @@
 
         try {
             const res = await fetch(url, {
-                method,
+                method: method, // Should be POST for Form Data with _method field
                 headers: {
+                    // DO NOT include 'Content-Type: application/json' when sending FormData
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: formData
             });
 
+            // The key is to check the response status before assuming JSON parsing will succeed
             let data = {};
-            try {
-                data = await res.json();
-            } catch {
-                console.warn('Response not JSON');
+            if (res.status !== 204) { // Check if response has content (204 is no content)
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    // This catches the non-JSON body (e.g., 500 error page)
+                    console.error('Failed to parse JSON response:', jsonErr, res.statusText);
+                    showToast('A critical server error occurred (Non-JSON Response).', 'error');
+
+                    // Jump to finally block to reset UI
+                    buttonText.textContent = action === 'add' ? 'Save User' : 'Update User';
+                    button.disabled = false;
+                    spinner?.classList.add('hidden');
+                    return;
+                }
             }
 
+            // Now check if the response was successful (res.ok is true for 200-299)
+            // OR if it was a validation error (422) but the body didn't contain success: true
             if (!res.ok || !data.success) {
-                if (data.errors) {
+                // Check for validation errors (Laravel returns these in the 'errors' object)
+                if (res.status === 422 && data.errors) {
                     Object.values(data.errors).forEach(errorArr => {
                         errorArr.forEach(errMsg => showToast(errMsg, 'error'));
                     });
                 } else {
-                    showToast(data.message || 'Something went wrong.', 'error');
+                    // Handle general errors (404, 500, or a failed but valid JSON response)
+                    showToast(data.message || `Request failed with status: ${res.status}`, 'error');
                 }
                 return;
             }
 
+            // SUCCESS block
             showToast(data.message || 'User saved successfully!', 'success');
             closeAddUserModal();
 
