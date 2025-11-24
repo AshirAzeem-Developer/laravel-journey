@@ -17,6 +17,8 @@
 </head>
 
 <body class="font-sans text-gray-900 antialiased">
+    @include('components.toast')
+
     <div class="min-h-screen flex flex-col sm:justify-center items-center sm:pt-0 bg-gray-100">
 
 

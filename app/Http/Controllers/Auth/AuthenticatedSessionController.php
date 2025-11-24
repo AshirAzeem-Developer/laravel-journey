@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,9 +25,9 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): RedirectResponse | JsonResponse
     {
-        // The $request->authenticate() already runs validation and logs in the user on success
+
         $request->authenticate();
         $request->session()->regenerate();
 
@@ -46,9 +47,7 @@ class AuthenticatedSessionController extends Controller
                 $request->session()->regenerateToken();
 
                 // Redirect back to admin login with a custom error
-                return redirect()->back()->with([
-                    'error' => 'Access denied. You do not have administrator privileges.',
-                ]);
+                return  redirect()->back()->with('error', 'These credentials do not match our records.');
             }
         }
 
