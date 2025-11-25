@@ -79,10 +79,16 @@
                         file:bg-blue-600 file:text-white hover:file:bg-blue-700">
                     <div class="mt-3 flex flex-wrap" id="productPreviewContainer">
 
-                        <img id="productPreview" src="{{ asset('asset/images/default-product.jpg') }}"
+                        {{-- <img id="productPreview" src="{{ asset('asset/images/default-product.jpg') }}"
                             class="w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2"
-                            alt="Preview">
+                            alt="Preview"> --}}
                     </div>
+                </div>
+                <div class="mt-3 flex flex-wrap" id="productPreviousImages">
+
+                    {{-- <img id="productPreview" src="{{ asset('asset/images/default-product.jpg') }}"
+                            class="w-24 h-24 rounded-lg object-cover border border-gray-300 dark:border-gray-700 mr-2 mb-2"
+                            alt="Preview"> --}}
                 </div>
             </div>
 

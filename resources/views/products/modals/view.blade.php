@@ -4,7 +4,8 @@
 
         <div id="viewProductContent" class="space-y-3 text-gray-700 dark:text-gray-300">
             <p><strong>Name:</strong> <span id="viewProductName">—</span></p>
-            <p><strong>Description:</strong> <span id="viewProductDescription">—</span></p>
+            <p><strong>Description:</strong> <span id="viewProductDescription" class=" break-words overflow-auto">—</span>
+            </p>
             <p><strong>Price:</strong> <span id="viewProductPrice">—</span></p>
             <p><strong>Category:</strong> <span id="viewProductCategory">—</span></p>
 

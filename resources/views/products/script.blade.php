@@ -153,7 +153,7 @@
             productCategorySelect.value = product.category_id;
             isHotCheckbox.checked = product.isHot == 1;
             isActiveCheckbox.checked = product.isActive == 1;
-            renderProductAttachments(product.attachments, 'productPreviewContainer', true);
+            renderProductAttachments(product.attachments, 'productPreviousImages', true);
             productTitle.textContent = 'Edit Product';
             productModal.classList.remove('hidden');
             productModal.classList.add('flex');
