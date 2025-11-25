@@ -12,11 +12,10 @@ class WebsiteController extends Controller
 
     public function home()
     {
-        // Fetch categories and eager-load their related products.
-        // This is the optimized query: 2 database queries instead of N+1.
-        $data['categories'] = Category::with('products')->get();
+        $data['categories'] = Category::with(['products' => function ($q) {
+            $q->where('isActive', 1); // sirf active products
+        }])->get();
 
-        // Pass the categories collection (which includes products) to the view.
         return view('website.index', compact('data'));
     }
     public function checkout()

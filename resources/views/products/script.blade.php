@@ -262,7 +262,7 @@
             document.getElementById('viewProductName').innerHTML = product.product_name;
             document.getElementById('viewProductDescription').innerHTML = product.description || 'N/A';
             document.getElementById('viewProductPrice').innerHTML = `$${product.price}`;
-            document.getElementById('viewProductCategory').innerHTML = product.category.category_name ??
+            document.getElementById('viewProductCategory').innerHTML = product.categoey.category_name ??
                 'Uncategorized';
             document.getElementById('viewProductHot').innerHTML = product.isHot ? 'Yes' : 'No';
             document.getElementById('viewProductActive').innerHTML = product.isActive ? 'Yes' : 'No';
