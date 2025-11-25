@@ -7,6 +7,8 @@
         {{ __('Overview of all available products in the system.') }}
     </x-slot>
 
+
+
     <div class="py-10 px-6 bg-gray-50 dark:bg-transparent min-h-screen">
         <div class="max-w-7xl mx-auto">
             <div

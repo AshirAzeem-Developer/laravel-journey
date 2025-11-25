@@ -25,7 +25,7 @@
                     </label>
                     <textarea id="productDescription" name="description" rows="3"
                         class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
-                        placeholder="Enter product description"></textarea>
+                        placeholder="Enter product description max 300 Characters Allowed" maxlength="300"></textarea>
                 </div>
 
                 {{-- Price --}}
