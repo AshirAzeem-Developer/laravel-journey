@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; // Kept for demonstration of products_count
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -33,11 +34,21 @@ class CategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'category_name' => 'required|string|max:255|unique:tbl_categories,category_name',
             'description' => 'nullable|string|max:500', // NEW: Validation for description
-            'category_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // NEW: Image validation
-        ]);
+            'category_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // NEW: Image validation
+        ];
+
+        $messages = [
+            'category_name.required' => 'The category name is required.',
+            'category_name.unique' => 'The category name must be unique.',
+            'category_image.required' => 'The category image is required.',
+            'category_image.image' => 'The category image must be an image file.',
+            'category_image.mimes' => 'The category image must be a file of type: jpeg, png, jpg, gif, svg.',
+            'category_image.max' => 'The category image may not be greater than 2MB.',
+        ];
+
 
         $imagePath = null;
         if ($request->hasFile('category_image')) {
@@ -45,9 +56,16 @@ class CategoryController extends Controller
             $imagePath = $request->file('category_image')->store('categories', 'public');
         }
 
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return back()->withInput()
+                ->with('error', $validator->errors()->first());
+        }
+
         Category::create([
-            'category_name' => $validated['category_name'],
-            'description' => $validated['description'] ?? null,
+            'category_name' => $request->input('category_name'),
+            'description' => $request->input('description') ?? null,
             'category_image' => $imagePath, // Save the path
             'created_at' => now(),
             'updated_at' => now(),
