@@ -104,6 +104,7 @@
                             throw new Error('Failed to fetch order details.');
                         }
                         const order = await response.json();
+                        console.log(order);
 
                         // Format Date
                         const createdAt = new Date(order.created_at);
@@ -125,7 +126,7 @@
                                 <div><strong>Order #:</strong> ${order.order_number}</div>
                                 <div><strong>Amount:</strong> $${(order.total_amount)}</div>
                                 <div><strong>Date:</strong> ${dateString} - ${timeString}</div>
-                                <div><strong>Customer:</strong> ${order.user_name || 'Guest User'} (ID: ${order.user_id || 'N/A'})</div>
+                                <div><strong>Customer:</strong> ${order?.user?.name ? order.user.name : 'Guest User'} (ID: ${order.user_id || 'N/A'})</div>
                             </div>
 
                             <h4 class="text-lg font-bold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4 mt-6 text-indigo-600 dark:text-indigo-400">Status & Payment</h4>

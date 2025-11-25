@@ -143,6 +143,8 @@ class DashboardController extends Controller
     }
     public function getOrderDetails(Order $order): JsonResponse
     {
+        // Load user relationship
+        $order->load('user');
         return response()->json($order);
     }
 

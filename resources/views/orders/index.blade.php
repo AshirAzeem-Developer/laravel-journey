@@ -36,7 +36,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             {{-- Now uses the pre-calculated variable --}}
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Orders</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Payments</p>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                                 {{ $pendingOrdersCount }}
                             </p>
@@ -119,8 +119,8 @@
                             </option>
                             <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>
                                 Pending</option>
-                            <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>
-                                Cancelled</option>
+                            {{-- <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}> --}}
+                            Cancelled</option>
                             <option value="refunded" {{ request('payment_status') == 'refunded' ? 'selected' : '' }}>
                                 Refunded</option>
                         </select>
