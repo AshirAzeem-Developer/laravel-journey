@@ -10,6 +10,7 @@
     const spinner = document.getElementById('spinner');
     const buttonText = document.getElementById('buttonText');
     const modalTitle = document.getElementById('modalTitle');
+    const userForm = document.getElementById('userForm');
     let currentUserId = null;
 
     // --- Delete Modal Variables ---
@@ -83,7 +84,9 @@
     }
 
     // --- Add/Edit Form Submission Logic ---
-    button.addEventListener('click', async () => {
+    userForm.addEventListener('submit', async (e) => {
+        // Prevent the default browser form submission (page reload)
+        e.preventDefault();
         // Show spinner and disable button
         button.disabled = true;
         buttonText.textContent = ''; // Hide text
@@ -104,11 +107,10 @@
             return;
         }
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('email', email);
-        if (password) formData.append('password', password);
-        if (fileInput && fileInput.files[0]) formData.append('file', fileInput.files[0]);
+        const formData = new FormData(userForm);
+
+        if (fileInput && fileInput.files[0]) formData.set('file', fileInput.files[0]);
+        if (!password) formData.delete('password');
 
         let url = '',
             method = 'POST';
