@@ -119,6 +119,7 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
+
     // ======================
     // ADD PRODUCT MODAL
     // ======================
@@ -161,97 +162,6 @@
             showToast('Failed to fetch product data.', 'error');
         }
     }
-
-    // ======================
-    // ADD/EDIT SUBMISSION
-    // ======================
-    // productSaveButton.addEventListener('click', async () => {
-    //     productSaveButton.disabled = true;
-    //     productButtonText.textContent = '';
-    //     productSpinner?.classList.remove('hidden');
-
-    //     const name = productNameInput.value.trim();
-    //     const description = productDescriptionInput.value.trim();
-    //     const price = productPriceInput.value.trim();
-    //     const category = productCategorySelect.value;
-    //     const isHot = isHotCheckbox.checked ? 1 : 0;
-    //     const isActive = isActiveCheckbox.checked ? 1 : 0;
-    //     const files = productFileInput.files;
-
-    //     if (!name || !price || !category) {
-    //         showToast('Please fill all required fields.', 'warning');
-    //         resetButtonState();
-    //         return;
-    //     }
-
-    //     const formData = new FormData();
-    //     formData.append('product_name', name);
-    //     formData.append('description', description);
-    //     formData.append('price', price);
-    //     formData.append('category_id', category);
-    //     formData.append('isHot', isHot);
-    //     formData.append('isActive', isActive);
-    //     if (files && files.length > 0) {
-    //         for (let i = 0; i < files.length; i++) {
-    //             formData.append('attachments[]', files[
-    //                 i]); // Use 'attachments[]' to match the form input name
-    //         }
-    //     }
-    //     let url = '';
-    //     let method = 'POST';
-    //     const action = productSaveButton.getAttribute('data-action');
-
-    //     if (action === 'add') {
-    //         url = "{{ route('products.store') }}";
-    //     } else if (action === 'edit' && currentProductId) {
-    //         url = `{{ url('/products') }}/${currentProductId}`;
-    //         formData.append('_method', 'PATCH');
-    //     } else {
-    //         showToast('Invalid operation.', 'error');
-    //         resetButtonState();
-    //         return;
-    //     }
-
-    //     try {
-    //         const res = await fetch(url, {
-    //             method,
-    //             headers: {
-    //                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-    //                 'Accept': 'application/json'
-    //             },
-    //             body: formData
-    //         });
-
-    //         const data = await res.json().catch(() => ({}));
-
-    //         console.log("HTTP status:", res.status, "Response:", data);
-
-    //         if (res.status === 422 && data.errors) {
-    //             let msg = `<strong>${data.title}</strong><ul>`;
-    //             data.errors.forEach(e => (msg += `<li>${e}</li>`));
-    //             msg += '</ul>';
-    //             showToast(msg, 'error'); // use your toast/modal
-    //             resetButtonState();
-    //             return;
-    //         }
-
-    //         if (!res.ok || !data.success) {
-    //             showToast(data.message || 'Something went wrong.', 'error');
-    //             resetButtonState();
-    //             return;
-    //         }
-
-    //         showToast(data.message || 'Product saved successfully!', 'success');
-    //         closeProductModal();
-    //         setTimeout(() => location.reload(), 1000);
-    //     } catch (err) {
-    //         console.error(err);
-    //         showToast('Network or server error.', 'error');
-    //     } finally {
-    //         resetButtonState();
-    //     }
-    // });
-
     // ======================
     // VIEW PRODUCT MODAL
     // ======================
@@ -262,7 +172,7 @@
             document.getElementById('viewProductName').innerHTML = product.product_name;
             document.getElementById('viewProductDescription').innerHTML = product.description || 'N/A';
             document.getElementById('viewProductPrice').innerHTML = `$${product.price}`;
-            document.getElementById('viewProductCategory').innerHTML = product.categoey.category_name ??
+            document.getElementById('viewProductCategory').innerHTML = product.category.category_name ??
                 'Uncategorized';
             document.getElementById('viewProductHot').innerHTML = product.isHot ? 'Yes' : 'No';
             document.getElementById('viewProductActive').innerHTML = product.isActive ? 'Yes' : 'No';
@@ -294,6 +204,64 @@
         productSaveButton.disabled = false;
         productSpinner?.classList.add('hidden');
     }
+
+
+
+    document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // form ko reload hone se roka
+
+        const form = this;
+        const url = form.action;
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                }
+            });
+
+            if (res.status === 422) {
+                // Laravel validation error
+                const data = await res.json();
+
+                // Pehle se errors clear kar do
+                const errorElements = document.querySelectorAll('.input-error');
+                errorElements.forEach(el => el.remove());
+
+                // Naye errors show karo
+                Object.keys(data.errors).forEach(key => {
+                    const field = document.querySelector(`[name="${key}"]`);
+                    if (field) {
+                        const err = document.createElement('p');
+                        err.className = "input-error text-red-500 text-sm mt-1";
+                        err.textContent = data.errors[key][0];
+                        field.parentNode.appendChild(err);
+                    }
+                });
+
+                showToast("Please fix the errors!", "error");
+                return; // modal close na ho
+            }
+
+            const data = await res.json();
+
+            if (data.success) {
+                showToast("Product added successfully!", "success");
+
+                closeAddProductModal(); // ab modal close hoga
+
+                setTimeout(() => location.reload(), 800);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showToast("Server error!", "error");
+        }
+    });
+
 
     // ======================
     // DELETE PRODUCT MODAL

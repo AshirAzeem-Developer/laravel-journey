@@ -33,7 +33,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Price
                     </label>
-                    <input type="number" id="productPrice" name="price" step="0.01"
+                    <input type="number" id="productPrice" name="price" min="0" max="100000" step="0.01"
                         class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
                         placeholder="Enter product price" required>
                 </div>

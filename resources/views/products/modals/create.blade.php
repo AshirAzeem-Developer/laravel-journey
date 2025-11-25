@@ -2,7 +2,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg w-full max-w-lg p-6">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add New Product</h2>
 
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url('/admin_dashboard/Products') }}" id="addProductForm" enctype="multipart/form-data">
             @csrf
             <div class="space-y-4">
                 {{-- Product Name --}}
@@ -29,7 +29,8 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Price
                     </label>
-                    <input type="number" id="addProductPrice" name="price" step="0.01"
+                    <input type="number" id="addProductPrice" name="price" min="0" max="100000"
+                        step="0.01"
                         class="mt-1 w-full border-gray-300 dark:border-gray-700 rounded-lg dark:bg-gray-900 dark:text-gray-100"
                         placeholder="Enter product price">
                 </div>

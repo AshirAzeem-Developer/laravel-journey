@@ -41,7 +41,7 @@ class ProductController extends Controller
         $rules = [
             'product_name' => 'required|string|max:255',
             'description'  => 'required|string',
-            'price'        => 'required|numeric|min:1',
+            'price'        => 'required|numeric|min:1|max:100000',
             'category_id'  => 'required|exists:tbl_categories,id',
             'isHot'        => 'boolean',
             'isActive'     => 'boolean',
@@ -54,8 +54,10 @@ class ProductController extends Controller
             'price.required'        => 'Please provide a price.',
             'price.numeric'         => 'Price must be a valid number.',
             'price.min'             => 'Price must be at least 1.',
+            'price.max'             => 'Price must not exceed 100,000.',
             'category_id.required'  => 'Please select a category.',
             'category_id.exists'    => 'The selected category is invalid.',
+            'attachments.required' => 'Please upload at least one image.',
             'attachments.*.mimes'   => 'Only JPG, JPEG, PNG, and GIF images are allowed.',
             'attachments.*.max'     => 'Each image must be smaller than 2 MB.',
         ];
@@ -63,8 +65,13 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return back()->withInput()->with('error', '❌ Failed to add product. Please try again.' . $validator->errors()->first());
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Failed to add product.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
+
 
         try {
             DB::beginTransaction();
@@ -83,10 +90,17 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return redirect()->route('products.index')->with('success', '✅ Product “' . e($product->product_name) . '” added successfully!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added successfully!',
+                'product' => $product
+            ]);
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', '❌ Failed to add product. Please try again.' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Failed to add product. Please try again. ' . $e->getMessage()
+            ], 500);
         }
     }
     /**

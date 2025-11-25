@@ -13,7 +13,7 @@ class WebsiteController extends Controller
     public function home()
     {
         $data['categories'] = Category::with(['products' => function ($q) {
-            $q->where('isActive', 1); // sirf active products
+            $q->where('isActive', 1);
         }])->get();
 
         return view('website.index', compact('data'));
