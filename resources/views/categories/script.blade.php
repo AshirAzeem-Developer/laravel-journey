@@ -175,13 +175,16 @@
             // Format created date if available
             if (category.created_at) {
                 // Use a comprehensive format since it's a DATETIME column
-                const date = new Date(category.created_at);
-                document.getElementById('viewCategoryCreated').textContent = date.toLocaleDateString('en-US', {
+                const utcDateStr = category.created_at + " UTC";
+                const date = new Date(utcDateStr);
+                document.getElementById('viewCategoryCreated').textContent = date.toLocaleString('en-US', {
+                    timeZone: 'Asia/Karachi',
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    hour12: true
                 });
             } else {
                 document.getElementById('viewCategoryCreated').textContent = 'N/A';
