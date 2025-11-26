@@ -276,7 +276,7 @@
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <label>Postcode / ZIP *</label>
-                                            <input type="text"
+                                            <input type="text" maxlength="5"
                                                 class="form-control address-field individual-address-field @error('postcode') is-invalid @enderror"
                                                 name="postcode" value="{{ $user_data['postcode'] }}" required />
                                             @error('postcode')

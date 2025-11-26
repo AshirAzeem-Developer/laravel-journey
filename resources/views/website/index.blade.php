@@ -515,13 +515,13 @@
                                                 {{ __('Register') }}
                                             </button>
 
-                                            <a class="text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4"
+                                            {{-- <a class="text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4"
                                                 href="{{ route('login') }}">
                                                 {{ __('Already registered? Login Now') }}
-                                            </a>
+                                            </a> --}}
                                         </div>
                                     </form>
-                                    <div class="form-choice">
+                                    {{-- <div class="form-choice">
                                         <p class="text-center">or sign in with</p>
                                         <div class="row">
                                             <div class="col-sm-6">
@@ -537,7 +537,7 @@
                                                 </a>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>
