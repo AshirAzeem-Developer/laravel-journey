@@ -47,7 +47,7 @@
 
                 <div class="relative z-10 p-6">
                     <!-- Action Bar -->
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-end mb-6">
                         <div class="flex items-center gap-3">
                             <button onclick="openAddCategoryModal()"
                                 class="group relative bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg shadow-blue-600/30 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
@@ -60,10 +60,10 @@
                             </button>
                         </div>
 
-                        <!-- Search Bar -->
+                        {{-- <!-- Search Bar -->
                         <div class="relative group">
                             <div
-                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors">
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-blue-400 transition-colors z-10">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -71,7 +71,7 @@
                             </div>
                             <input type="text" placeholder="Search categories..."
                                 class="pl-12 pr-4 py-2.5 bg-[#0f1621]/80 backdrop-blur-sm border border-[#2d3b4e] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-[#3d4b5e] w-64">
-                        </div>
+                        </div> --}}
                     </div>
 
                     <!-- Table -->
